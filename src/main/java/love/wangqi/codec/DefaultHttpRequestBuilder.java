@@ -37,11 +37,13 @@ public class DefaultHttpRequestBuilder implements HttpRequestBuilder {
     HttpDataFactory factory = new DefaultHttpDataFactory(DefaultHttpDataFactory.MINSIZE);
 
     public class RequestHolder {
+        public Route route;
         public URL url;
         public HttpRequest request;
         public HttpPostRequestEncoder bodyRequestEncoder;
 
-        public RequestHolder(URL url, HttpRequest request, HttpPostRequestEncoder bodyRequestEncoder) {
+        public RequestHolder(Route route, URL url, HttpRequest request, HttpPostRequestEncoder bodyRequestEncoder) {
+            this.route = route;
             this.url = url;
             this.request = request;
             this.bodyRequestEncoder = bodyRequestEncoder;
@@ -133,7 +135,7 @@ public class DefaultHttpRequestBuilder implements HttpRequestBuilder {
                 ((FullHttpRequest)newRequest).content().writeBytes(bbuf);
             }
         }
-        return new RequestHolder(url, newRequest, newBodyRequestEncoder);
+        return new RequestHolder(route, url, newRequest, newBodyRequestEncoder);
     }
 
     /**

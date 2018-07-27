@@ -35,6 +35,7 @@ public class GatewayServerTest {
                     routeList.add(new Route(5L, HttpMethod.GET, "/oschina", new URL("https://www.oschina.net/")));
                     routeList.add(new Route(6L, HttpMethod.POST, "/users/{id}", new URL("http://127.0.0.1/pre/users/{id}")));
                     routeList.add(new Route(7L, HttpMethod.GET, "/css/main.css", new URL("https://blog.wangqi.love/css/main.css")));
+                    routeList.add(new Route(8L, HttpMethod.GET, "/path", new URL("http://127.0.0.1:9990/path")));
                 } catch (MalformedURLException e) {
                 }
                 return routeList;

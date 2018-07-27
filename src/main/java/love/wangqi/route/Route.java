@@ -26,15 +26,26 @@ public class Route {
      * 请求方法
      */
     private HttpMethod method;
+    /**
+     * 请求超时时间
+     */
+    private Integer timeoutInMilliseconds;
+
+    private static final Integer DEFAULT_TIMEOUT = 3000;
 
     public Route() {
     }
 
     public Route(Long id, HttpMethod method, String path, URL mapUrl) {
+        this(id, method, path, mapUrl, DEFAULT_TIMEOUT);
+    }
+
+    public Route(Long id, HttpMethod method, String path, URL mapUrl, Integer timeoutInMilliseconds) {
         this.id = id;
         this.path = path;
         this.mapUrl = mapUrl;
         this.method = method;
+        this.timeoutInMilliseconds = timeoutInMilliseconds;
     }
 
     public Long getId() {
@@ -67,5 +78,13 @@ public class Route {
 
     public void setMethod(HttpMethod method) {
         this.method = method;
+    }
+
+    public Integer getTimeoutInMilliseconds() {
+        return timeoutInMilliseconds;
+    }
+
+    public void setTimeoutInMilliseconds(Integer timeoutInMilliseconds) {
+        this.timeoutInMilliseconds = timeoutInMilliseconds;
     }
 }

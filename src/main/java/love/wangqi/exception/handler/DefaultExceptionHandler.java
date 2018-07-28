@@ -10,6 +10,7 @@ import love.wangqi.exception.NoRouteException;
 import love.wangqi.exception.TimeoutException;
 
 import java.net.ConnectException;
+import java.util.concurrent.RejectedExecutionException;
 
 /**
  * @author: wangqi
@@ -32,6 +33,10 @@ public class DefaultExceptionHandler extends AbstractExceptionHandler {
             exceptionResponse.setStatus(HttpResponseStatus.REQUEST_TIMEOUT);
             exceptionResponse.setContentType("text/plain");
             exceptionResponse.setContent("request timeout");
+        } else if (exception instanceof RejectedExecutionException) {
+            exceptionResponse.setStatus(HttpResponseStatus.TOO_MANY_REQUESTS);
+            exceptionResponse.setContentType("text/plain");
+            exceptionResponse.setContent("too many requests");
         } else {
             exceptionResponse.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR);
             exceptionResponse.setContentType("text/plain");
@@ -43,11 +48,11 @@ public class DefaultExceptionHandler extends AbstractExceptionHandler {
     @Override
     public void send(ChannelHandlerContext ctx, ExceptionResponse exceptionResponse) {
         String content = exceptionResponse.getContent();
-        FullHttpResponse response;
-        response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, exceptionResponse.getStatus());
+        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, exceptionResponse.getStatus());
         if (content != null) {
             response.headers().set("X-Ca-Error-Message", content);
         }
-        ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+        ctx.channel().writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+        ctx.channel().close();
     }
 }

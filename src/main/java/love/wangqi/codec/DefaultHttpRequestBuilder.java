@@ -28,27 +28,12 @@ public class DefaultHttpRequestBuilder implements HttpRequestBuilder {
     private static final Logger logger = LoggerFactory.getLogger(DefaultHttpRequestBuilder.class);
 
     private RouteMapper routeMapper;
-    private FullHttpRequest originRequest;
     private HttpRequest newRequest;
     private HttpPostRequestEncoder newBodyRequestEncoder;
 
     protected HttpRequestDecomposer httpRequestDecomposer;
 
     HttpDataFactory factory = new DefaultHttpDataFactory(DefaultHttpDataFactory.MINSIZE);
-
-    public class RequestHolder {
-        public Route route;
-        public URL url;
-        public HttpRequest request;
-        public HttpPostRequestEncoder bodyRequestEncoder;
-
-        public RequestHolder(Route route, URL url, HttpRequest request, HttpPostRequestEncoder bodyRequestEncoder) {
-            this.route = route;
-            this.url = url;
-            this.request = request;
-            this.bodyRequestEncoder = bodyRequestEncoder;
-        }
-    }
 
     public DefaultHttpRequestBuilder() {
     }
@@ -60,25 +45,19 @@ public class DefaultHttpRequestBuilder implements HttpRequestBuilder {
     }
 
     @Override
-    public DefaultHttpRequestBuilder setOriginRequest(FullHttpRequest originRequest) {
-        this.originRequest = originRequest;
-        this.httpRequestDecomposer = new HttpRequestDecomposer(originRequest);
-        return this;
+    public Route getRoute(FullHttpRequest originRequest) {
+        return routeMapper.getRoute(originRequest);
     }
 
     @Override
-    public Route getRoute() {
-        return routeMapper.getRoute(this.originRequest);
-    }
-
-    @Override
-    public RequestHolder build() throws Exception {
-        Route route = getRoute();
+    public RequestHolder build(FullHttpRequest originRequest) throws Exception {
+        httpRequestDecomposer = new HttpRequestDecomposer(originRequest);
+        Route route = getRoute(originRequest);
         if (route == null) {
             throw new NoRouteException();
         }
         URL url  = route.getMapUrl();
-        logger.info(url.toString());
+//        logger.info(url.toString());
 
         // 请求路径
         QueryStringEncoder queryStringEncoder = new QueryStringEncoder(url.getPath());

@@ -19,22 +19,15 @@ public interface HttpRequestBuilder {
     DefaultHttpRequestBuilder setRouteMapper(RouteMapper routeMapper);
 
     /**
-     * 设置原始请求
-     * @param originRequest
-     * @return
-     */
-    DefaultHttpRequestBuilder setOriginRequest(FullHttpRequest originRequest);
-
-    /**
      * 生成新的请求
      * @return
      * @throws Exception
      */
-    DefaultHttpRequestBuilder.RequestHolder build() throws Exception;
+    RequestHolder build(FullHttpRequest originRequest) throws Exception;
 
     /**
      * 获取路由
      * @return
      */
-    Route getRoute();
+    Route getRoute(FullHttpRequest originRequest);
 }

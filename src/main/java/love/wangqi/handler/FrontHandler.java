@@ -2,9 +2,10 @@ package love.wangqi.handler;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.*;
 import love.wangqi.codec.DefaultHttpRequestBuilder;
 import love.wangqi.codec.HttpRequestBuilder;
+import love.wangqi.codec.RequestHolder;
 import love.wangqi.filter.HttpRequestFilter;
 import love.wangqi.handler.command.ForwardCommand;
 import love.wangqi.server.GatewayServer;
@@ -33,24 +34,19 @@ public class FrontHandler extends ChannelInboundHandlerAdapter {
                 httpRequestFilter.filter(GatewayServer.config, ctx, httpRequest);
             }
 
-            HttpRequestBuilder httpRequestBuilder = GatewayServer.config.getHttpRequestBuilder()
-                    .setRouteMapper(GatewayServer.config.getRouteMapper())
-                    .setOriginRequest(httpRequest);
+            HttpRequestBuilder httpRequestBuilder = new DefaultHttpRequestBuilder()
+                    .setRouteMapper(GatewayServer.config.getRouteMapper());
 
-            DefaultHttpRequestBuilder.RequestHolder requestHolder = httpRequestBuilder.build();
+            RequestHolder requestHolder = httpRequestBuilder.build(httpRequest);
+
             ForwardCommand forwardCommand = new ForwardCommand(ctx, requestHolder);
             forwardCommand.queue();
         } catch (Exception e) {
             logger.error(e.toString());
             GatewayServer.config.getExceptionHandler().handle(ctx, e);
-        } finally {
+        }
+        finally {
             httpRequest.release();
         }
-    }
-
-    @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        logger.info("连接的客户端地址：{}", ctx.channel().remoteAddress());
-        super.channelActive(ctx);
     }
 }

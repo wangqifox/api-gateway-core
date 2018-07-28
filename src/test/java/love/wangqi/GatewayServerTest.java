@@ -4,6 +4,7 @@ package love.wangqi;
 import io.netty.handler.codec.http.HttpMethod;
 import love.wangqi.codec.DefaultHttpRequestBuilder;
 import love.wangqi.config.GatewayConfig;
+import love.wangqi.exception.handler.DefaultExceptionHandler;
 import love.wangqi.route.AbstractRouteMapper;
 import love.wangqi.route.Route;
 import love.wangqi.route.RouteMapper;
@@ -45,6 +46,7 @@ public class GatewayServerTest {
         GatewayConfig config = new GatewayConfig();
         config.setPort(9999);
         config.setHttpRequestBuilder(new DefaultHttpRequestBuilder());
+        config.setExceptionHandler(new DefaultExceptionHandler());
         config.setRouteMapper(routeMapper);
 
         GatewayServer server = new GatewayServer().setConfig(config);

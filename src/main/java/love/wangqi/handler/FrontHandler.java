@@ -5,7 +5,6 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.FullHttpRequest;
 import love.wangqi.codec.DefaultHttpRequestBuilder;
 import love.wangqi.codec.HttpRequestBuilder;
-import love.wangqi.exception.handler.DefaultExceptionHandler;
 import love.wangqi.filter.HttpRequestFilter;
 import love.wangqi.handler.command.ForwardCommand;
 import love.wangqi.server.GatewayServer;
@@ -20,7 +19,6 @@ import org.slf4j.LoggerFactory;
  */
 public class FrontHandler extends ChannelInboundHandlerAdapter {
     private final Logger logger = LoggerFactory.getLogger(FrontHandler.class);
-    private final DefaultExceptionHandler defaultExceptionHandler = new DefaultExceptionHandler();
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
@@ -40,15 +38,11 @@ public class FrontHandler extends ChannelInboundHandlerAdapter {
                     .setOriginRequest(httpRequest);
 
             DefaultHttpRequestBuilder.RequestHolder requestHolder = httpRequestBuilder.build();
-            ForwardCommand forwardCommand = new ForwardCommand(ctx.channel(), requestHolder);
+            ForwardCommand forwardCommand = new ForwardCommand(ctx, requestHolder);
             forwardCommand.queue();
         } catch (Exception e) {
             logger.error(e.toString());
-            if (GatewayServer.config.getExceptionHandler() != null) {
-                GatewayServer.config.getExceptionHandler().handle(ctx, e);
-            } else {
-                defaultExceptionHandler.handle(ctx, e);
-            }
+            GatewayServer.config.getExceptionHandler().handle(ctx, e);
         } finally {
             httpRequest.release();
         }

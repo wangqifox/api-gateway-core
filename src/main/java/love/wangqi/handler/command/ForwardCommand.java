@@ -1,8 +1,10 @@
 package love.wangqi.handler.command;
 
 import com.netflix.hystrix.*;
+import com.netflix.hystrix.exception.HystrixTimeoutException;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -12,7 +14,7 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import love.wangqi.codec.DefaultHttpRequestBuilder;
-import love.wangqi.config.GatewayConfig;
+import love.wangqi.exception.TimeoutException;
 import love.wangqi.handler.BackendFilter;
 import love.wangqi.server.GatewayServer;
 
@@ -24,10 +26,10 @@ import java.net.URL;
  * @date: Created in 2018/7/27 下午3:10
  */
 public class ForwardCommand extends HystrixCommand<Void> {
-    private Channel inboundChannel;
+    private ChannelHandlerContext ctx;
     private DefaultHttpRequestBuilder.RequestHolder requestHolder;
 
-    public ForwardCommand(Channel inboundChannel, DefaultHttpRequestBuilder.RequestHolder requestHolder) {
+    public ForwardCommand(ChannelHandlerContext ctx, DefaultHttpRequestBuilder.RequestHolder requestHolder) {
         super(Setter.withGroupKey(HystrixCommandGroupKey.Factory.asKey("ForwardCommandGroup"))
                 .andCommandKey(HystrixCommandKey.Factory.asKey("ForwardCommand"))
                 .andThreadPoolKey(HystrixThreadPoolKey.Factory.asKey("threadPool-" + requestHolder.route.getId()))
@@ -45,23 +47,41 @@ public class ForwardCommand extends HystrixCommand<Void> {
                 )
         );
 
-        this.inboundChannel = inboundChannel;
+        this.ctx = ctx;
         this.requestHolder = requestHolder;
     }
 
 
     @Override
     protected Void run() throws Exception {
-        forward(inboundChannel, requestHolder.url, requestHolder.request, requestHolder.bodyRequestEncoder);
+        forward(ctx.channel(), requestHolder.url, requestHolder.request, requestHolder.bodyRequestEncoder);
         return null;
     }
 
     @Override
     protected Void getFallback() {
+        Exception exception = getExceptionFromThrowable(getExecutionException());
+        if (exception instanceof HystrixTimeoutException) {
+            GatewayServer.config.getExceptionHandler().handle(ctx, new TimeoutException());
+        } else {
+            GatewayServer.config.getExceptionHandler().handle(ctx, exception);
+        }
         return null;
     }
 
-    private void forward(Channel inboundChannel, URL url, HttpRequest request, HttpPostRequestEncoder bodyRequestEncoder) throws Exception {
+    class UrlMetadata {
+        String protocol;
+        String host;
+        int port;
+
+        public UrlMetadata(String protocol, String host, int port) {
+            this.protocol = protocol;
+            this.host = host;
+            this.port = port;
+        }
+    }
+
+    private UrlMetadata getProtocol(URL url) {
         String protocol = url.getProtocol() == null ? "http" : url.getProtocol();
         String host = url.getHost() == null ? "127.0.0.1" : url.getHost();
         int port = url.getPort();
@@ -74,12 +94,15 @@ public class ForwardCommand extends HystrixCommand<Void> {
         }
 
         if (!"http".equalsIgnoreCase(protocol) && !"https".equalsIgnoreCase(protocol)) {
-            System.err.println("Only HTTP(S) is supported.");
-            return;
+            throw new RuntimeException("Only HTTP(S) is supported.");
         }
+        return new UrlMetadata(protocol, host, port);
+    }
 
+    private void forward(Channel inboundChannel, URL url, HttpRequest request, HttpPostRequestEncoder bodyRequestEncoder) throws Exception {
+        UrlMetadata urlMetadata = getProtocol(url);
         // Configure SSL context if necessary.
-        final boolean ssl = "https".equalsIgnoreCase(protocol);
+        final boolean ssl = "https".equalsIgnoreCase(urlMetadata.protocol);
         final SslContext sslCtx;
         if (ssl) {
             sslCtx = SslContextBuilder.forClient()
@@ -95,7 +118,7 @@ public class ForwardCommand extends HystrixCommand<Void> {
                     .channel(NioSocketChannel.class)
                     .handler(new BackendFilter(sslCtx, inboundChannel));
 
-            Channel ch = b.connect(host, port).sync().channel();
+            Channel ch = b.connect(urlMetadata.host, urlMetadata.port).sync().channel();
 
             ch.write(request);
             if (bodyRequestEncoder != null && bodyRequestEncoder.isChunked()) {

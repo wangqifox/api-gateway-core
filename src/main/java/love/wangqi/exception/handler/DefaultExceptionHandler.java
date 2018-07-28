@@ -7,6 +7,7 @@ import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import love.wangqi.exception.NoRouteException;
+import love.wangqi.exception.TimeoutException;
 
 import java.net.ConnectException;
 
@@ -27,6 +28,10 @@ public class DefaultExceptionHandler extends AbstractExceptionHandler {
             exceptionResponse.setStatus(HttpResponseStatus.NOT_FOUND);
             exceptionResponse.setContentType("text/plain");
             exceptionResponse.setContent("connect server refused");
+        } else if (exception instanceof TimeoutException) {
+            exceptionResponse.setStatus(HttpResponseStatus.REQUEST_TIMEOUT);
+            exceptionResponse.setContentType("text/plain");
+            exceptionResponse.setContent("request timeout");
         } else {
             exceptionResponse.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR);
             exceptionResponse.setContentType("text/plain");

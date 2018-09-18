@@ -2,15 +2,12 @@ package love.wangqi.handler;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.handler.codec.http.*;
-import love.wangqi.codec.DefaultHttpRequestBuilder;
-import love.wangqi.codec.HttpRequestBuilder;
-import love.wangqi.codec.RequestHolder;
-import love.wangqi.filter.HttpRequestFilter;
-import love.wangqi.handler.command.ForwardCommand;
-import love.wangqi.server.GatewayServer;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import love.wangqi.context.HttpRequestContext;
+import love.wangqi.exception.GatewayException;
 
 
 /**
@@ -21,32 +18,27 @@ import org.slf4j.LoggerFactory;
 public class FrontHandler extends ChannelInboundHandlerAdapter {
     private final Logger logger = LoggerFactory.getLogger(FrontHandler.class);
 
-    @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if (!(msg instanceof FullHttpRequest)) {
-            GatewayServer.config.getExceptionHandler().handle(ctx, new Exception("未知请求"));
-            return;
-        }
+    private HttpRequestContext httpRequestContext = HttpRequestContext.getInstance();
 
-        FullHttpRequest httpRequest = (FullHttpRequest) msg;
+    @Override
+    public void channelRead(ChannelHandlerContext ctx, Object msg) {
+        FullHttpRequest httpRequest = null;
+        GatewayRunner runner = null;
         try {
-            for (HttpRequestFilter httpRequestFilter : GatewayServer.config.getHttpRequestFilterList()) {
-                httpRequestFilter.filter(GatewayServer.config, ctx, httpRequest);
+            if (!(msg instanceof FullHttpRequest)) {
+                throw new Exception("未知请求");
             }
 
-            HttpRequestBuilder httpRequestBuilder = new DefaultHttpRequestBuilder()
-                    .setRouteMapper(GatewayServer.config.getRouteMapper());
+            httpRequest = (FullHttpRequest) msg;
+            httpRequestContext.setChannelHandlerContext(httpRequest, ctx);
 
-            RequestHolder requestHolder = httpRequestBuilder.build(httpRequest);
-
-            ForwardCommand forwardCommand = new ForwardCommand(ctx, requestHolder);
-            forwardCommand.queue();
-        } catch (Exception e) {
-            logger.error(e.toString());
-            GatewayServer.config.getExceptionHandler().handle(ctx, e);
-        }
-        finally {
-            httpRequest.release();
+            runner = new GatewayRunner(httpRequest);
+            runner.run();
+        } catch (Throwable e) {
+            e.printStackTrace();
+            Exception exception = new GatewayException(HttpResponseStatus.INTERNAL_SERVER_ERROR, "UNHANDLED_EXCEPTION_" + e.getClass().getName());
+            httpRequestContext.setException(httpRequest, exception);
+            runner.error();
         }
     }
 }

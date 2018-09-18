@@ -9,7 +9,7 @@ import io.netty.handler.codec.http.multipart.HttpPostRequestEncoder;
 import io.netty.handler.codec.http.multipart.InterfaceHttpData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import love.wangqi.exception.NoRouteException;
+import love.wangqi.exception.GatewayNoRouteException;
 import love.wangqi.route.Route;
 import love.wangqi.route.RouteMapper;
 
@@ -54,7 +54,7 @@ public class DefaultHttpRequestBuilder implements HttpRequestBuilder {
         httpRequestDecomposer = new HttpRequestDecomposer(originRequest);
         Route route = getRoute(originRequest);
         if (route == null) {
-            throw new NoRouteException();
+            throw new GatewayNoRouteException();
         }
         URL url  = route.getMapUrl();
 //        logger.info(url.toString());

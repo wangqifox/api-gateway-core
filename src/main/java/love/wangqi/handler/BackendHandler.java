@@ -1,11 +1,10 @@
 package love.wangqi.handler;
 
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.handler.codec.http.FullHttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import love.wangqi.context.HttpRequestContext;
 
 /**
  * @author: wangqi
@@ -16,6 +15,7 @@ public class BackendHandler extends ChannelInboundHandlerAdapter {
     private Logger logger = LoggerFactory.getLogger(BackendHandler.class);
 
     private ChannelHandlerContext ctx;
+    private HttpRequestContext httpRequestContext = HttpRequestContext.getInstance();
 
     BackendHandler(ChannelHandlerContext ctx) {
         this.ctx = ctx;
@@ -23,7 +23,7 @@ public class BackendHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        this.ctx.channel().writeAndFlush(msg).addListener(ChannelFutureListener.CLOSE);
+        httpRequestContext.setResponse(this.ctx.channel(), msg);
         ctx.channel().close();
     }
 }

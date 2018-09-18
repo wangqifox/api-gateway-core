@@ -43,13 +43,13 @@ public class GatewayServerTest {
             }
         };
         routeMapper.refresh(null);
-        GatewayConfig config = new GatewayConfig();
+        GatewayConfig config = GatewayConfig.getInstance();
         config.setPort(9999);
         config.setHttpRequestBuilder(new DefaultHttpRequestBuilder());
-        config.setExceptionHandler(new DefaultExceptionHandler());
         config.setRouteMapper(routeMapper);
+        config.setExceptionHandler(new DefaultExceptionHandler());
 
-        GatewayServer server = new GatewayServer().setConfig(config);
+        GatewayServer server = new GatewayServer();
         server.start();
     }
 

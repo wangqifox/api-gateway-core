@@ -1,6 +1,9 @@
-package love.wangqi.handler.command;
+package love.wangqi.filter.command;
 
-import com.netflix.hystrix.*;
+import com.netflix.hystrix.HystrixCommand;
+import com.netflix.hystrix.HystrixCommandGroupKey;
+import com.netflix.hystrix.HystrixCommandKey;
+import com.netflix.hystrix.HystrixCommandProperties;
 import com.netflix.hystrix.exception.HystrixTimeoutException;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -13,10 +16,12 @@ import io.netty.handler.codec.http.multipart.HttpPostRequestEncoder;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import love.wangqi.codec.RequestHolder;
-import love.wangqi.exception.TimeoutException;
+import love.wangqi.context.HttpRequestContext;
+import love.wangqi.exception.GatewayTimeoutException;
 import love.wangqi.handler.BackendFilter;
-import love.wangqi.server.GatewayServer;
 
 import java.net.URL;
 
@@ -28,22 +33,17 @@ import java.net.URL;
 public class ForwardCommand extends HystrixCommand<Void> {
     private ChannelHandlerContext ctx;
     private RequestHolder requestHolder;
+    private HttpRequestContext httpRequestContext = HttpRequestContext.getInstance();
+    private final static Logger logger = LoggerFactory.getLogger(ForwardCommand.class);
 
     public ForwardCommand(ChannelHandlerContext ctx, RequestHolder requestHolder) {
         super(Setter.withGroupKey(HystrixCommandGroupKey.Factory.asKey("ForwardCommandGroup"))
-                .andCommandKey(HystrixCommandKey.Factory.asKey("ForwardCommand"))
-                .andThreadPoolKey(HystrixThreadPoolKey.Factory.asKey("threadPool-" + requestHolder.route.getId()))
-                .andThreadPoolPropertiesDefaults(
-                        HystrixThreadPoolProperties.Setter()
-                        .withCoreSize(1)
-                        .withMaximumSize(10)
-                        .withAllowMaximumSizeToDivergeFromCoreSize(true)
-                )
+                .andCommandKey(HystrixCommandKey.Factory.asKey(String.valueOf(requestHolder.route.getId())))
                 .andCommandPropertiesDefaults(
                         HystrixCommandProperties.Setter()
-                        .withExecutionTimeoutInMilliseconds(requestHolder.route.getTimeoutInMilliseconds())
-                        .withExecutionIsolationStrategy(HystrixCommandProperties.ExecutionIsolationStrategy.THREAD)
-                        .withFallbackIsolationSemaphoreMaxConcurrentRequests(100)
+                                .withExecutionTimeoutInMilliseconds(requestHolder.route.getTimeoutInMilliseconds())
+                                .withExecutionIsolationStrategy(HystrixCommandProperties.ExecutionIsolationStrategy.SEMAPHORE)
+                                .withFallbackIsolationSemaphoreMaxConcurrentRequests(10000)
                 )
         );
         this.ctx = ctx;
@@ -61,10 +61,9 @@ public class ForwardCommand extends HystrixCommand<Void> {
     protected Void getFallback() {
         Exception exception = getExceptionFromThrowable(getExecutionException());
         if (exception instanceof HystrixTimeoutException) {
-            GatewayServer.config.getExceptionHandler().handle(ctx, new TimeoutException());
-        } else {
-            GatewayServer.config.getExceptionHandler().handle(ctx, exception);
+            exception = new GatewayTimeoutException();
         }
+        httpRequestContext.setException(ctx.channel(), exception);
         return null;
     }
 

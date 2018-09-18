@@ -5,12 +5,13 @@ import io.netty.channel.ChannelInboundHandler;
 import io.netty.channel.ChannelOutboundHandler;
 import love.wangqi.codec.HttpRequestBuilder;
 import love.wangqi.exception.handler.ExceptionHandler;
-import love.wangqi.filter.HttpRequestFilter;
+import love.wangqi.filter.FilterRegistry;
+import love.wangqi.filter.GatewayFilter;
 import love.wangqi.listener.ChannelCloseFutureListener;
 import love.wangqi.route.RouteMapper;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author: wangqi
@@ -18,6 +19,35 @@ import java.util.List;
  * @date: Created in 2018/6/4 下午6:49
  */
 public class GatewayConfig {
+
+    final static GatewayConfig INSTANCE = new GatewayConfig();
+
+    private final ConcurrentHashMap<String, List<GatewayFilter>> hashFiltersByType = new ConcurrentHashMap<String, List<GatewayFilter>>();
+
+    public static GatewayConfig getInstance() {
+        return INSTANCE;
+    }
+
+    public List<GatewayFilter> getFiltersByType(String filterType) {
+        List<GatewayFilter> list = hashFiltersByType.get(filterType);
+        if (list != null) {
+            return list;
+        }
+
+        list = new ArrayList<>();
+
+        Collection<GatewayFilter> filters = FilterRegistry.instance().getAllFilters();
+        for (Iterator<GatewayFilter> iterator = filters.iterator(); iterator.hasNext(); ) {
+            GatewayFilter filter = iterator.next();
+            if (filter.filterType().equals(filterType)) {
+                list.add(filter);
+            }
+        }
+        Collections.sort(list);
+        hashFiltersByType.putIfAbsent(filterType, list);
+        return list;
+    }
+
     /**
      * 读入流量处理器
      */
@@ -47,20 +77,15 @@ public class GatewayConfig {
      */
     private ChannelCloseFutureListener channelCloseFutureListener;
     /**
-     * HttpRequest过滤器
-     */
-    private List<HttpRequestFilter> httpRequestFilterList;
-    /**
      * 异常处理器
      */
     private ExceptionHandler exceptionHandler;
 
 
-    public GatewayConfig() {
+    private GatewayConfig() {
         channelInboundHandlerList = new ArrayList<>();
         channelOutboundHandlerList = new ArrayList<>();
         httpResponseHandlerList = new ArrayList<>();
-        httpRequestFilterList = new ArrayList<>();
     }
 
     public void addChannelInboundHandler(ChannelInboundHandler channelInboundHandler) {
@@ -117,14 +142,6 @@ public class GatewayConfig {
 
     public void setChannelCloseFutureListener(ChannelCloseFutureListener channelCloseFutureListener) {
         this.channelCloseFutureListener = channelCloseFutureListener;
-    }
-
-    public void addHttpRequestFilter(HttpRequestFilter httpRequestFilter) {
-        httpRequestFilterList.add(httpRequestFilter);
-    }
-
-    public List<HttpRequestFilter> getHttpRequestFilterList() {
-        return httpRequestFilterList;
     }
 
     public ExceptionHandler getExceptionHandler() {

@@ -18,12 +18,7 @@ import love.wangqi.handler.FrontFilter;
 public class GatewayServer {
     private static final Logger logger = LoggerFactory.getLogger(GatewayServer.class);
 
-    public static GatewayConfig config;
-
-    public GatewayServer setConfig(GatewayConfig gatewayConfig) {
-        config = gatewayConfig;
-        return this;
-    }
+    private GatewayConfig config = GatewayConfig.getInstance();
 
     public void start() {
         EventLoopGroup bossGroup = new NioEventLoopGroup();

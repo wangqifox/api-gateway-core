@@ -4,6 +4,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpUtil;
+import love.wangqi.context.RequestConstant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import love.wangqi.context.HttpRequestContext;
@@ -31,6 +33,9 @@ public class FrontHandler extends ChannelInboundHandlerAdapter {
 
             httpRequest = (FullHttpRequest) msg;
             httpRequestContext.setChannelHandlerContext(httpRequest, ctx);
+
+            Boolean keepAlive = HttpUtil.isKeepAlive(httpRequest);
+            httpRequestContext.set(httpRequest, RequestConstant.KEEPALIVE, keepAlive);
 
             runner = GatewayRunner.getInstance();
             runner.forwardAction(httpRequest);

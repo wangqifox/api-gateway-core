@@ -44,7 +44,7 @@ public class ForwardCommand extends HystrixCommand<Void> {
                         // command配置
                         .andCommandPropertiesDefaults(
                             HystrixCommandProperties.Setter()
-                                .withExecutionTimeoutInMilliseconds(100)
+                                .withExecutionTimeoutInMilliseconds(1000)
                                 .withExecutionIsolationStrategy(HystrixCommandProperties.ExecutionIsolationStrategy.SEMAPHORE)
                                 .withFallbackIsolationSemaphoreMaxConcurrentRequests(10000)
                         )

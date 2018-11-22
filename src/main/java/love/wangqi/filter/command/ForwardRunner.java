@@ -1,7 +1,5 @@
 package love.wangqi.filter.command;
 
-import com.netflix.hystrix.*;
-import com.netflix.hystrix.exception.HystrixTimeoutException;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -11,70 +9,37 @@ import io.netty.handler.codec.http.multipart.HttpPostRequestEncoder;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
+import love.wangqi.codec.RequestHolder;
+import love.wangqi.handler.BackendFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import love.wangqi.codec.RequestHolder;
-import love.wangqi.context.HttpRequestContext;
-import love.wangqi.exception.GatewayTimeoutException;
-import love.wangqi.handler.BackendFilter;
 
 import java.net.URL;
 
 /**
  * @author: wangqi
  * @description:
- * @date: Created in 2018/7/27 下午3:10
+ * @date: Created in 2018/11/22 下午3:42
  */
-public class ForwardCommand extends HystrixCommand<Void> {
+public class ForwardRunner {
     private ChannelHandlerContext ctx;
     private RequestHolder requestHolder;
-    private HttpRequestContext httpRequestContext = HttpRequestContext.getInstance();
     private final static String HTTP = "http";
     private final static String HTTPS = "https";
     private Channel ch;
     private final static EventLoopGroup eventExecutors = new NioEventLoopGroup(8 * 8);
 
-    private final static Logger logger = LoggerFactory.getLogger(ForwardCommand.class);
+    private final static Logger logger = LoggerFactory.getLogger(ForwardRunner.class);
 
-    public ForwardCommand(ChannelHandlerContext ctx, RequestHolder requestHolder) {
-        super(Setter.withGroupKey(HystrixCommandGroupKey.Factory.asKey("ForwardCommandGroup"))
-                        .andCommandKey(HystrixCommandKey.Factory.asKey(requestHolder.route.getId() + requestHolder.route.getPath()))
-                        // 熔断器配置
-                        .andCommandPropertiesDefaults(HystrixCommandProperties.Setter().withCircuitBreakerEnabled(true))
-                        // command配置
-                        .andCommandPropertiesDefaults(
-                            HystrixCommandProperties.Setter()
-                                .withExecutionTimeoutInMilliseconds(1000)
-                                .withExecutionIsolationStrategy(HystrixCommandProperties.ExecutionIsolationStrategy.SEMAPHORE)
-                                .withFallbackIsolationSemaphoreMaxConcurrentRequests(10000)
-                        )
-
-        );
+    public ForwardRunner(ChannelHandlerContext ctx, RequestHolder requestHolder) {
         this.ctx = ctx;
         this.requestHolder = requestHolder;
     }
 
-
-    @Override
-    protected Void run() throws Exception {
+    public void execute() throws Exception {
         forward();
-        return null;
     }
 
-    @Override
-    protected Void getFallback() {
-        Exception exception = getExceptionFromThrowable(getExecutionException());
-        if (exception instanceof HystrixTimeoutException) {
-            logger.error("time out");
-            exception = new GatewayTimeoutException();
-        }
-        httpRequestContext.setException(ctx.channel(), exception);
-        HystrixCircuitBreaker breaker = HystrixCircuitBreaker.Factory.getInstance(
-                HystrixCommandKey.Factory.asKey(requestHolder.route.getId() + requestHolder.route.getPath())
-        );
-        logger.info("断路器状态： " + breaker.isOpen());
-        return null;
-    }
 
     class UrlMetadata {
         String protocol;

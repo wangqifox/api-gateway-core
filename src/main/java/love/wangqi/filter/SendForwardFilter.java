@@ -6,7 +6,7 @@ import love.wangqi.codec.HttpRequestBuilder;
 import love.wangqi.codec.RequestHolder;
 import love.wangqi.config.GatewayConfig;
 import love.wangqi.context.HttpRequestContext;
-import love.wangqi.filter.command.ForwardCommand;
+import love.wangqi.filter.command.ForwardRunner;
 
 /**
  * @author: wangqi
@@ -35,7 +35,7 @@ public class SendForwardFilter extends GatewayFilter {
         RequestHolder requestHolder = httpRequestBuilder.build(httpRequest);
 
         ChannelHandlerContext ctx = httpRequestContext.getChannelHandlerContext(httpRequest);
-        ForwardCommand forwardCommand = new ForwardCommand(ctx, requestHolder);
-        forwardCommand.execute();
+        ForwardRunner forwardRunner = new ForwardRunner(ctx, requestHolder);
+        forwardRunner.execute();
     }
 }

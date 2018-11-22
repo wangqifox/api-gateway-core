@@ -1,6 +1,5 @@
 package love.wangqi.filter;
 
-import com.netflix.hystrix.exception.HystrixRuntimeException;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.slf4j.Logger;
@@ -41,8 +40,6 @@ public class FilterProcessor {
             runFilters("route", httpRequest);
         } catch (GatewayException e) {
             throw e;
-        } catch (HystrixRuntimeException hre) {
-            throw new GatewayException(HttpResponseStatus.INTERNAL_SERVER_ERROR, hre.getMessage());
         } catch (Throwable e) {
             logger.error(e.getMessage(), e);
             throw new GatewayException(HttpResponseStatus.INTERNAL_SERVER_ERROR, "UNCAUGHT_EXCEPTION_IN_PRE_FILTER_" + e.getClass().getName());

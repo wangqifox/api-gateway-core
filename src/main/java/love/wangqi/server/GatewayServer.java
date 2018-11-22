@@ -2,6 +2,7 @@ package love.wangqi.server;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -21,15 +22,19 @@ public class GatewayServer {
     private GatewayConfig config = GatewayConfig.getInstance();
 
     public void start() {
-        EventLoopGroup bossGroup = new NioEventLoopGroup();
-        EventLoopGroup workerGroup = new NioEventLoopGroup();
-        ServerBootstrap b = new ServerBootstrap();
+        EventLoopGroup bossGroup = new NioEventLoopGroup(4);
+        EventLoopGroup workerGroup = new NioEventLoopGroup(8 * 4);
+        ServerBootstrap bootstrap = new ServerBootstrap();
         try {
-            b.group(bossGroup, workerGroup);
-            b.channel(NioServerSocketChannel.class);
-            b.childHandler(new FrontFilter());
+            bootstrap.group(bossGroup, workerGroup)
+                    .channel(NioServerSocketChannel.class)
+                    .option(ChannelOption.SO_BACKLOG, 1024 * 4)
+                    .childOption(ChannelOption.SO_KEEPALIVE, true)
+                    .childOption(ChannelOption.TCP_NODELAY, true)
+                    .childOption(ChannelOption.SO_REUSEADDR, true)
+                    .childHandler(new FrontFilter());
 
-            ChannelFuture f = b.bind(config.getPort()).sync();
+            ChannelFuture f = bootstrap.bind(config.getPort()).sync();
             logger.info("服务端启动成功，端口是：{}", config.getPort());
             f.channel().closeFuture().sync();
         } catch (InterruptedException e) {

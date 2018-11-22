@@ -1,6 +1,8 @@
 package love.wangqi.route;
 
 import io.netty.handler.codec.http.HttpMethod;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URL;
 
@@ -9,7 +11,8 @@ import java.net.URL;
  * @description:
  * @date: Created in 2018/5/30 上午9:43
  */
-public class Route {
+public class Route implements Cloneable {
+    private final Logger logger = LoggerFactory.getLogger(Route.class);
     /**
      * id
      */
@@ -46,6 +49,17 @@ public class Route {
         this.mapUrl = mapUrl;
         this.method = method;
         this.timeoutInMilliseconds = timeoutInMilliseconds;
+    }
+
+    @Override
+    protected Route clone() {
+        Route route = this;
+        try {
+            route = (Route) super.clone();
+        } catch (CloneNotSupportedException e) {
+            logger.error(e.getMessage());
+        }
+        return route;
     }
 
     public Long getId() {

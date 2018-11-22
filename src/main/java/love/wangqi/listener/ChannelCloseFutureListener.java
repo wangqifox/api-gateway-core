@@ -1,7 +1,7 @@
 package love.wangqi.listener;
 
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
-import io.netty.channel.socket.SocketChannel;
 
 /**
  * @author: wangqi
@@ -14,5 +14,5 @@ public interface ChannelCloseFutureListener {
      * @param channel
      * @param future
      */
-    void operationComplete(SocketChannel channel, ChannelFuture future);
+    void operationComplete(Channel channel, ChannelFuture future);
 }

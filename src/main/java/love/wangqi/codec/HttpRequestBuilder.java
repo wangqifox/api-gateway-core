@@ -16,10 +16,11 @@ public interface HttpRequestBuilder {
      * @param routeMapper
      * @return
      */
-    DefaultHttpRequestBuilder setRouteMapper(RouteMapper routeMapper);
+    HttpRequestBuilder setRouteMapper(RouteMapper routeMapper);
 
     /**
      * 生成新的请求
+     * @param originRequest
      * @return
      * @throws Exception
      */
@@ -27,6 +28,7 @@ public interface HttpRequestBuilder {
 
     /**
      * 获取路由
+     * @param originRequest
      * @return
      */
     Route getRoute(FullHttpRequest originRequest);

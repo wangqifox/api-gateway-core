@@ -16,9 +16,16 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @date: Created in 2018/9/4 上午9:01
  */
 public class GatewayRunner {
-    private FullHttpRequest httpRequest;
-    private HttpRequestContext httpRequestContext = HttpRequestContext.getInstance();
     private final static Logger logger = LoggerFactory.getLogger(GatewayRunner.class);
+
+    private HttpRequestContext httpRequestContext = HttpRequestContext.getInstance();
+    private final static GatewayRunner INSTANCE = new GatewayRunner();
+
+    private GatewayRunner() {}
+
+    public static GatewayRunner getInstance() {
+        return INSTANCE;
+    }
 
     static abstract class AbstractDefaultThreadFactory implements ThreadFactory {
         protected static final AtomicInteger poolNumber = new AtomicInteger(1);
@@ -84,55 +91,87 @@ public class GatewayRunner {
         }
     }
 
-    private static ExecutorService preRoutePool = new ThreadPoolExecutor(5, 20,
+    private static ExecutorService preRoutePool = new ThreadPoolExecutor(5, 10,
             30L, TimeUnit.MILLISECONDS,
             new LinkedBlockingQueue<>(), new PreRouteThreadFactory());
 
-    private static ExecutorService routePool = new ThreadPoolExecutor(5, 20,
+    private static ExecutorService routePool = new ThreadPoolExecutor(1, 1,
             30L, TimeUnit.MILLISECONDS,
             new LinkedBlockingQueue<>(), new RouteThreadFactory());
 
-    private static ExecutorService postRoutePool = new ThreadPoolExecutor(5, 20,
+    private static ExecutorService postRoutePool = new ThreadPoolExecutor(5, 10,
             30L, TimeUnit.MILLISECONDS,
             new LinkedBlockingQueue<>(), new PostRouteThreadFactory());
 
-    private static ExecutorService errorRoutePool = new ThreadPoolExecutor(5, 20,
+    private static ExecutorService errorRoutePool = new ThreadPoolExecutor(5, 10,
             30L, TimeUnit.MILLISECONDS,
             new LinkedBlockingQueue<>(), new ErrorRouteThreadFactory());
 
-    public GatewayRunner(FullHttpRequest httpRequest) {
-        this.httpRequest = httpRequest;
-    }
-
-    public void run() {
-        CompletableFuture.completedFuture(httpRequest)
-                .thenAcceptAsync(httpRequest -> preRoute(), preRoutePool)
-                .thenAcceptAsync(httpRequest -> route(), routePool)
-                .thenAcceptAsync(httpRequest -> error(), errorRoutePool)
-                .thenAcceptAsync(httpRequest -> postRoute(), postRoutePool)
+    public void forwardAction(FullHttpRequest fullHttpRequest) {
+        CompletableFuture.completedFuture(fullHttpRequest)
+                .thenApplyAsync(httpRequest -> {
+                    preRoute(httpRequest);
+                    return httpRequest;
+                }, preRoutePool)
+                .thenApplyAsync(httpRequest -> {
+                    route(httpRequest);
+                    return httpRequest;
+                }, routePool)
                 .exceptionally(throwable -> {
                     CompletableFuture.completedFuture(throwable)
                             .thenAcceptAsync(throwable1 -> {
-                                httpRequestContext.setException(httpRequest, (Exception) throwable.getCause());
-                                error();
+                                httpRequestContext.setException(fullHttpRequest, (Exception) throwable.getCause());
+                                error(fullHttpRequest);
                             }, errorRoutePool);
                     return null;
                 });
     }
 
-    private void preRoute() throws GatewayException {
+    public void errorAction(FullHttpRequest fullHttpRequest) {
+        CompletableFuture.completedFuture(fullHttpRequest)
+                .thenApplyAsync(httpRequest -> {
+                    error(httpRequest);
+                    return httpRequest;
+                }, errorRoutePool)
+                .exceptionally(throwable -> {
+                    CompletableFuture.completedFuture(throwable)
+                            .thenAcceptAsync(throwable1 -> {
+                                httpRequestContext.setException(fullHttpRequest, (Exception) throwable.getCause());
+                                error(fullHttpRequest);
+                            }, errorRoutePool);
+                    return null;
+                });
+    }
+
+    public void postRoutAction(FullHttpRequest fullHttpRequest) {
+        CompletableFuture.completedFuture(fullHttpRequest)
+                .thenApplyAsync(httpRequest -> {
+                    postRoute(httpRequest);
+                    return httpRequest;
+                }, postRoutePool)
+                .exceptionally(throwable -> {
+                    CompletableFuture.completedFuture(throwable)
+                            .thenAcceptAsync(throwable1 -> {
+                                httpRequestContext.setException(fullHttpRequest, (Exception) throwable.getCause());
+                                error(fullHttpRequest);
+                            }, errorRoutePool);
+                    return null;
+                });
+    }
+
+    public void preRoute(FullHttpRequest httpRequest) throws GatewayException {
         FilterProcessor.getInstance().preRoute(httpRequest);
     }
 
-    private void route() throws GatewayException {
+    public void route(FullHttpRequest httpRequest) throws GatewayException {
         FilterProcessor.getInstance().route(httpRequest);
     }
 
-    private void postRoute() throws GatewayException {
+    public void postRoute(FullHttpRequest httpRequest) throws GatewayException {
         FilterProcessor.getInstance().postRoute(httpRequest);
     }
 
-    public void error() {
+    public void error(FullHttpRequest httpRequest) {
         FilterProcessor.getInstance().error(httpRequest);
     }
 }

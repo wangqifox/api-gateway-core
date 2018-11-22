@@ -28,22 +28,19 @@ public class FrontFilter extends ChannelInitializer<SocketChannel> {
     protected void initChannel(SocketChannel ch) throws Exception {
         ChannelPipeline ph = ch.pipeline();
 
-
         config.getChannelInboundHandlerList().forEach(ph::addLast);
         config.getChannelOutboundHandlerList().forEach(ph::addLast);
-        ph.addLast("encoder", new HttpResponseEncoder());
+        ph.addLast(new HttpResponseEncoder());
         config.getHttpResponseHandlerList().forEach(ph::addLast);
-        ph.addLast("decoder", new HttpRequestDecoder());
-        ph.addLast("chunkedWriter", new ChunkedWriteHandler());
-        ph.addLast("aggregator", new HttpObjectAggregator(10 * 1024 * 1024));
-        ph.addLast("handler", new FrontHandler());
+        ph.addLast(new HttpRequestDecoder());
+        ph.addLast(new ChunkedWriteHandler());
+        ph.addLast(new HttpObjectAggregator(10 * 1024 * 1024));
+        ph.addLast(new FrontHandler());
 
         ch.closeFuture().addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) throws Exception {
-                if (config.getChannelCloseFutureListener() != null) {
-                    config.getChannelCloseFutureListener().operationComplete(ch, future);
-                }
+                logger.debug("channel close");
             }
         });
     }

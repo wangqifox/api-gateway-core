@@ -11,4 +11,5 @@ public class RequestConstant {
     public static final String EXCEPTION = "exception";
     public static final String STATUSCODE = "statusCode";
     public static final String RESPONSE = "response";
+    public static final String KEEPALIVE = "keepAlive";
 }

@@ -38,9 +38,11 @@ public abstract class AbstractRouteMapper implements RouteMapper {
                 continue;
             }
             if (route.getPath().equals(path)) {
+                route = route.clone();
                 return route;
             }
             if (this.pathMatcher.match(route.getPath(), path)) {
+                route = route.clone();
                 Map<String, String> uriTemplateVariables = this.pathMatcher.extractUriTemplateVariables(route.getPath(), path);
                 if (!uriTemplateVariables.isEmpty()) {
                     String mapUrl = route.getMapUrl().toString();

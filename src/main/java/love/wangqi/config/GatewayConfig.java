@@ -4,6 +4,7 @@ package love.wangqi.config;
 import io.netty.channel.ChannelInboundHandler;
 import io.netty.channel.ChannelOutboundHandler;
 import love.wangqi.codec.HttpRequestBuilder;
+import love.wangqi.core.ResponseHandler;
 import love.wangqi.exception.handler.ExceptionHandler;
 import love.wangqi.filter.FilterRegistry;
 import love.wangqi.filter.GatewayFilter;
@@ -80,6 +81,10 @@ public class GatewayConfig {
      * 异常处理器
      */
     private ExceptionHandler exceptionHandler;
+    /**
+     * 响应处理器
+     */
+    private ResponseHandler responseHandler;
 
 
     private GatewayConfig() {
@@ -150,5 +155,13 @@ public class GatewayConfig {
 
     public void setExceptionHandler(ExceptionHandler exceptionHandler) {
         this.exceptionHandler = exceptionHandler;
+    }
+
+    public ResponseHandler getResponseHandler() {
+        return responseHandler;
+    }
+
+    public void setResponseHandler(ResponseHandler responseHandler) {
+        this.responseHandler = responseHandler;
     }
 }

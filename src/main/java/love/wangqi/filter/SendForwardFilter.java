@@ -2,7 +2,6 @@ package love.wangqi.filter;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
-import love.wangqi.codec.DefaultHttpRequestBuilder;
 import love.wangqi.codec.HttpRequestBuilder;
 import love.wangqi.codec.RequestHolder;
 import love.wangqi.config.GatewayConfig;
@@ -30,7 +29,7 @@ public class SendForwardFilter extends GatewayFilter {
 
     @Override
     public void filter(FullHttpRequest httpRequest) throws Exception {
-        HttpRequestBuilder httpRequestBuilder = new DefaultHttpRequestBuilder()
+        HttpRequestBuilder httpRequestBuilder = config.getHttpRequestBuilder()
                 .setRouteMapper(config.getRouteMapper());
 
         RequestHolder requestHolder = httpRequestBuilder.build(httpRequest);

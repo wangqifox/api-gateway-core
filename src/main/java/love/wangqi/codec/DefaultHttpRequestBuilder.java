@@ -39,7 +39,7 @@ public class DefaultHttpRequestBuilder implements HttpRequestBuilder {
     }
 
     @Override
-    public DefaultHttpRequestBuilder setRouteMapper(RouteMapper routeMapper) {
+    public HttpRequestBuilder setRouteMapper(RouteMapper routeMapper) {
         this.routeMapper = routeMapper;
         return this;
     }

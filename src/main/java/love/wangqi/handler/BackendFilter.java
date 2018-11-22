@@ -9,6 +9,9 @@ import io.netty.handler.codec.http.HttpContentDecompressor;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.stream.ChunkedWriteHandler;
+import io.netty.handler.timeout.ReadTimeoutHandler;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author: wangqi
@@ -18,22 +21,25 @@ import io.netty.handler.stream.ChunkedWriteHandler;
 public class BackendFilter extends ChannelInitializer<SocketChannel> {
     private final SslContext sslCtx;
     private final ChannelHandlerContext ctx;
+    private final Integer readTimeout;
 
-    public BackendFilter(SslContext sslCtx, ChannelHandlerContext ctx) {
+    public BackendFilter(SslContext sslCtx, ChannelHandlerContext ctx, Integer readTimeout) {
         this.sslCtx = sslCtx;
         this.ctx = ctx;
+        this.readTimeout = readTimeout;
     }
 
     @Override
     protected void initChannel(SocketChannel ch) throws Exception {
         ChannelPipeline pipeline = ch.pipeline();
         if (sslCtx != null) {
-            pipeline.addLast("ssl", sslCtx.newHandler(ch.alloc()));
+            pipeline.addLast(sslCtx.newHandler(ch.alloc()));
         }
-        pipeline.addLast("codec", new HttpClientCodec());
-        pipeline.addLast("inflater", new HttpContentDecompressor());
+        pipeline.addLast(new HttpClientCodec());
+        pipeline.addLast(new HttpContentDecompressor());
         pipeline.addLast(new HttpObjectAggregator(1024 * 1024 * 64));
-        pipeline.addLast("chunkedWriter", new ChunkedWriteHandler());
-        pipeline.addLast("handler", new BackendHandler(ctx));
+        pipeline.addLast(new ChunkedWriteHandler());
+        pipeline.addLast(new ReadTimeoutHandler(readTimeout, TimeUnit.MILLISECONDS));
+        pipeline.addLast(new BackendHandler(ctx));
     }
 }

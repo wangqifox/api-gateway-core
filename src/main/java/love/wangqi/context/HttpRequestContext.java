@@ -2,6 +2,7 @@ package love.wangqi.context;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpRequest;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,7 +31,7 @@ public class HttpRequestContext {
     }
 
     public void setRequestChannel(HttpRequest httpRequest, Channel channel) {
-        requestChannel.putIfAbsent(httpRequest, channel);
+        requestChannel.put(httpRequest, channel);
         set(channel, RequestConstant.HTTPREQUEST, httpRequest);
     }
 
@@ -47,9 +48,9 @@ public class HttpRequestContext {
         ConcurrentHashMap<String, Object> context = getContext(channel);
         if (context == null) {
             context = new ConcurrentHashMap<>();
-            channelContext.putIfAbsent(channel, context);
+            channelContext.put(channel, context);
         }
-        context.putIfAbsent(key, value);
+        context.put(key, value);
     }
 
     public <T> T get(HttpRequest httpRequest, String key) {
@@ -102,15 +103,15 @@ public class HttpRequestContext {
         set(channel, RequestConstant.EXCEPTION, exception);
     }
 
-    public void setResponse(Channel channel, Object response) {
+    public void setResponse(Channel channel, FullHttpResponse response) {
         set(channel, RequestConstant.RESPONSE, response);
     }
 
-    public Object getResponse(Channel channel) {
+    public FullHttpResponse getResponse(Channel channel) {
         return get(channel, RequestConstant.RESPONSE);
     }
 
-    public Object getResponse(HttpRequest httpRequest) {
+    public FullHttpResponse getResponse(HttpRequest httpRequest) {
         return get(httpRequest, RequestConstant.RESPONSE);
     }
 }

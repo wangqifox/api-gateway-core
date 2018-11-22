@@ -32,13 +32,13 @@ public class FrontHandler extends ChannelInboundHandlerAdapter {
             httpRequest = (FullHttpRequest) msg;
             httpRequestContext.setChannelHandlerContext(httpRequest, ctx);
 
-            runner = new GatewayRunner(httpRequest);
-            runner.run();
+            runner = GatewayRunner.getInstance();
+            runner.forwardAction(httpRequest);
         } catch (Throwable e) {
             e.printStackTrace();
             Exception exception = new GatewayException(HttpResponseStatus.INTERNAL_SERVER_ERROR, "UNHANDLED_EXCEPTION_" + e.getClass().getName());
             httpRequestContext.setException(httpRequest, exception);
-            runner.error();
+            runner.error(httpRequest);
         }
     }
 }

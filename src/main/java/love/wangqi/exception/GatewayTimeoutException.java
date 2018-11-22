@@ -10,6 +10,6 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 public class GatewayTimeoutException extends GatewayException {
 
     public GatewayTimeoutException() {
-        super(HttpResponseStatus.REQUEST_TIMEOUT, "timeout");
+        super(HttpResponseStatus.REQUEST_TIMEOUT, "request timeout");
     }
 }

@@ -95,7 +95,7 @@ public class GatewayRunner {
             30L, TimeUnit.MILLISECONDS,
             new LinkedBlockingQueue<>(), new PreRouteThreadFactory());
 
-    private static ExecutorService routePool = new ThreadPoolExecutor(1, 1,
+    private static ExecutorService routePool = new ThreadPoolExecutor(5, 10,
             30L, TimeUnit.MILLISECONDS,
             new LinkedBlockingQueue<>(), new RouteThreadFactory());
 

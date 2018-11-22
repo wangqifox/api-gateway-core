@@ -28,7 +28,7 @@ public class SendForwardFilter extends GatewayFilter {
     }
 
     @Override
-    public void filter(FullHttpRequest httpRequest) throws Exception {
+    public synchronized void filter(FullHttpRequest httpRequest) throws Exception {
         HttpRequestBuilder httpRequestBuilder = config.getHttpRequestBuilder()
                 .setRouteMapper(config.getRouteMapper());
 

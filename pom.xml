@@ -50,6 +50,7 @@
                 <configuration>
                     <skipTests>true</skipTests>
                 </configuration>
+                <version>2.21.0</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -74,7 +75,7 @@
                     <execution>
                         <id>build-server</id>
                         <configuration>
-                            <appendAssemblyId>false</appendAssemblyId>
+                            <!--<appendAssemblyId>false</appendAssemblyId>-->
                             <archive>
                                 <manifest>
                                     <mainClass>love.wangqi.GatewayServerDemo</mainClass>

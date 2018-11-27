@@ -39,6 +39,7 @@ public class HttpRequestContext {
         return channelContext.get(channel);
     }
 
+    @SuppressWarnings("unchecked")
     public <T> T get(Channel channel, String key) {
         ConcurrentHashMap<String, Object> context = getContext(channel);
         return context == null ? null : (T) context.get(key);

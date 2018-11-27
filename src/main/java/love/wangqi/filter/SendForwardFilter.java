@@ -1,11 +1,11 @@
 package love.wangqi.filter;
 
-import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.Channel;
 import io.netty.handler.codec.http.FullHttpRequest;
 import love.wangqi.codec.HttpRequestBuilder;
 import love.wangqi.codec.RequestHolder;
 import love.wangqi.config.GatewayConfig;
-import love.wangqi.context.HttpRequestContext;
+import love.wangqi.context.ContextUtil;
 import love.wangqi.filter.command.ForwardRunner;
 
 /**
@@ -15,7 +15,6 @@ import love.wangqi.filter.command.ForwardRunner;
  */
 public class SendForwardFilter extends GatewayFilter {
     private GatewayConfig config = GatewayConfig.getInstance();
-    private HttpRequestContext httpRequestContext = HttpRequestContext.getInstance();
 
     @Override
     public String filterType() {
@@ -28,14 +27,14 @@ public class SendForwardFilter extends GatewayFilter {
     }
 
     @Override
-    public synchronized void filter(FullHttpRequest httpRequest) throws Exception {
+    public synchronized void filter(Channel channel) throws Exception {
         HttpRequestBuilder httpRequestBuilder = config.getHttpRequestBuilder()
                 .setRouteMapper(config.getRouteMapper());
 
+        FullHttpRequest httpRequest = ContextUtil.getRequest(channel);
         RequestHolder requestHolder = httpRequestBuilder.build(httpRequest);
 
-        ChannelHandlerContext ctx = httpRequestContext.getChannelHandlerContext(httpRequest);
-        ForwardRunner forwardRunner = new ForwardRunner(ctx, requestHolder);
+        ForwardRunner forwardRunner = new ForwardRunner(channel, requestHolder);
         forwardRunner.execute();
     }
 }

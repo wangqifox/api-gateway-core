@@ -1,13 +1,12 @@
 package love.wangqi.filter;
 
 import io.netty.channel.Channel;
-import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
+import love.wangqi.config.GatewayConfig;
+import love.wangqi.context.ContextUtil;
 import love.wangqi.handler.GatewayRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import love.wangqi.config.GatewayConfig;
-import love.wangqi.context.HttpRequestContext;
 
 /**
  * @author: wangqi
@@ -17,7 +16,6 @@ import love.wangqi.context.HttpRequestContext;
 public class SendResponseFilter extends GatewayFilter {
     private static final Logger logger = LoggerFactory.getLogger(SendResponseFilter.class);
 
-    private HttpRequestContext httpRequestContext = HttpRequestContext.getInstance();
 
     private GatewayConfig config = GatewayConfig.getInstance();
 
@@ -32,15 +30,14 @@ public class SendResponseFilter extends GatewayFilter {
     }
 
     @Override
-    public void filter(FullHttpRequest httpRequest) throws Exception {
-        Channel channel = httpRequestContext.getChannel(httpRequest);
-        Exception e = httpRequestContext.getException(httpRequest);
-        if (channel != null && e == null) {
-            FullHttpResponse response = httpRequestContext.getResponse(httpRequest);
+    public void filter(Channel channel) throws Exception {
+        Exception e = ContextUtil.getException(channel);
+        if (e == null) {
+            FullHttpResponse response = ContextUtil.getResponse(channel);
 //            logger.info("*** content {}", response.content().toString(Charset.defaultCharset()));
             config.getResponseHandler().send(channel, response);
         } else {
-            GatewayRunner.getInstance().errorAction((FullHttpRequest) httpRequestContext.getHttpRequest(channel));
+            GatewayRunner.getInstance().errorAction(channel);
         }
     }
 }

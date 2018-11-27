@@ -1,6 +1,6 @@
 package love.wangqi.filter;
 
-import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.channel.Channel;
 
 /**
  * @author: wangqi
@@ -10,8 +10,8 @@ import io.netty.handler.codec.http.FullHttpRequest;
 public interface IGatewayFilter {
     /**
      * 过滤Http请求
-     * @param httpRequest
+     * @param channel
      * @throws Exception
      */
-    void filter(FullHttpRequest httpRequest) throws Exception;
+    void filter(Channel channel) throws Exception;
 }

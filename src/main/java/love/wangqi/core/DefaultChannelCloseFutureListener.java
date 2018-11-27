@@ -2,9 +2,7 @@ package love.wangqi.core;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
-import io.netty.handler.codec.http.FullHttpRequest;
-import love.wangqi.context.HttpRequestContext;
-import love.wangqi.context.RequestConstant;
+import love.wangqi.context.ContextUtil;
 import love.wangqi.listener.ChannelCloseFutureListener;
 
 /**
@@ -13,14 +11,12 @@ import love.wangqi.listener.ChannelCloseFutureListener;
  * @date: Created in 2018/11/22 下午4:21
  */
 public class DefaultChannelCloseFutureListener implements ChannelCloseFutureListener {
-    private HttpRequestContext httpRequestContext = HttpRequestContext.getInstance();
 
     @Override
     public void operationComplete(Channel channel, ChannelFuture future) {
-        Boolean keepAlive = httpRequestContext.get(channel, RequestConstant.KEEPALIVE);
+        Boolean keepAlive = ContextUtil.getKeepAlive(channel);
 
-        ((FullHttpRequest)httpRequestContext.getHttpRequest(channel)).release();
-        httpRequestContext.remove(channel);
+        ContextUtil.getRequest(channel).release();
 
         if (!keepAlive) {
             channel.close();

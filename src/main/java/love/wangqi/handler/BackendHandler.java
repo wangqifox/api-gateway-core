@@ -1,14 +1,14 @@
 package love.wangqi.handler;
 
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.timeout.ReadTimeoutException;
+import love.wangqi.context.ContextUtil;
+import love.wangqi.exception.GatewayTimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import love.wangqi.context.HttpRequestContext;
-import love.wangqi.exception.GatewayTimeoutException;
 
 /**
  * @author: wangqi
@@ -18,18 +18,17 @@ import love.wangqi.exception.GatewayTimeoutException;
 public class BackendHandler extends ChannelInboundHandlerAdapter {
     private Logger logger = LoggerFactory.getLogger(BackendHandler.class);
 
-    private ChannelHandlerContext ctx;
-    private HttpRequestContext httpRequestContext = HttpRequestContext.getInstance();
+    private Channel serverChannel;
 
-    BackendHandler(ChannelHandlerContext ctx) {
-        this.ctx = ctx;
+    BackendHandler(Channel serverChannel) {
+        this.serverChannel = serverChannel;
     }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        httpRequestContext.setResponse(this.ctx.channel(), (FullHttpResponse) msg);
+        ContextUtil.setResponse(serverChannel, (FullHttpResponse) msg);
         ctx.channel().close();
-        GatewayRunner.getInstance().postRoutAction((FullHttpRequest) httpRequestContext.getHttpRequest(this.ctx.channel()));
+        GatewayRunner.getInstance().postRoutAction(serverChannel);
     }
 
     @Override
@@ -37,11 +36,11 @@ public class BackendHandler extends ChannelInboundHandlerAdapter {
         if (cause instanceof ReadTimeoutException) {
             logger.error("read time out");
             Exception exception = new GatewayTimeoutException();
-            httpRequestContext.setException(this.ctx.channel(), exception);
+            ContextUtil.setException(serverChannel, exception);
         } else {
             logger.error(cause.getMessage(), cause);
-            httpRequestContext.setException(this.ctx.channel(), new RuntimeException(cause));
+            ContextUtil.setException(serverChannel, new RuntimeException(cause));
         }
-        GatewayRunner.getInstance().errorAction((FullHttpRequest) httpRequestContext.getHttpRequest(this.ctx.channel()));
+        GatewayRunner.getInstance().errorAction(serverChannel);
     }
 }

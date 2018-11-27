@@ -22,17 +22,16 @@ import java.net.URL;
  * @date: Created in 2018/11/22 下午3:42
  */
 public class ForwardRunner {
-    private ChannelHandlerContext ctx;
+    private Channel serverChannel;
     private RequestHolder requestHolder;
     private final static String HTTP = "http";
     private final static String HTTPS = "https";
-    private Channel ch;
     private final static EventLoopGroup eventExecutors = new NioEventLoopGroup(8 * 8);
 
     private final static Logger logger = LoggerFactory.getLogger(ForwardRunner.class);
 
-    public ForwardRunner(ChannelHandlerContext ctx, RequestHolder requestHolder) {
-        this.ctx = ctx;
+    public ForwardRunner(Channel serverChannel, RequestHolder requestHolder) {
+        this.serverChannel = serverChannel;
         this.requestHolder = requestHolder;
     }
 
@@ -94,12 +93,12 @@ public class ForwardRunner {
                 .group(eventExecutors)
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 500)
                 .channel(NioSocketChannel.class)
-                .handler(new BackendFilter(sslCtx, ctx, requestHolder.route.getTimeoutInMilliseconds()));
+                .handler(new BackendFilter(sslCtx, serverChannel, requestHolder.route.getTimeoutInMilliseconds()));
 
         bootstrap.connect(urlMetadata.host, urlMetadata.port).addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) throws Exception {
-                ch = future.channel();
+                Channel ch = future.channel();
                 ch.write(request);
                 if (bodyRequestEncoder != null && bodyRequestEncoder.isChunked()) {
                     ch.write(bodyRequestEncoder);

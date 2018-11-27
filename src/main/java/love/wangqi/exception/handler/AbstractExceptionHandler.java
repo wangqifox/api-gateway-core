@@ -1,6 +1,6 @@
 package love.wangqi.exception.handler;
 
-import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.Channel;
 
 /**
  * @author: wangqi
@@ -10,8 +10,8 @@ import io.netty.channel.ChannelHandlerContext;
 public abstract class AbstractExceptionHandler implements ExceptionHandler {
 
     @Override
-    public final void handle(ChannelHandlerContext ctx, Exception exception) {
+    public final void handle(Channel channel, Exception exception) {
         ExceptionResponse exceptionResponse = getExceptionResponse(exception);
-        send(ctx, exceptionResponse);
+        send(channel, exceptionResponse);
     }
 }

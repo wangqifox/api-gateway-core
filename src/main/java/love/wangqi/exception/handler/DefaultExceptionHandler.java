@@ -1,6 +1,6 @@
 package love.wangqi.exception.handler;
 
-import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.Channel;
 import io.netty.handler.codec.http.*;
 import love.wangqi.config.GatewayConfig;
 import love.wangqi.exception.GatewayException;
@@ -41,13 +41,13 @@ public class DefaultExceptionHandler extends AbstractExceptionHandler {
     }
 
     @Override
-    public void send(ChannelHandlerContext ctx, ExceptionResponse exceptionResponse) {
+    public void send(Channel channel, ExceptionResponse exceptionResponse) {
         String content = exceptionResponse.getContent();
         FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, exceptionResponse.getStatus());
         response.headers().set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
         if (content != null) {
             response.headers().set("X-Ca-Error-Message", content);
         }
-        config.getResponseHandler().send(ctx.channel(), response);
+        config.getResponseHandler().send(channel, response);
     }
 }

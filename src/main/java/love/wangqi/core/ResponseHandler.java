@@ -7,8 +7,7 @@ import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpUtil;
 import love.wangqi.config.GatewayConfig;
-import love.wangqi.context.HttpRequestContext;
-import love.wangqi.context.RequestConstant;
+import love.wangqi.context.ContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,11 +20,10 @@ public class ResponseHandler {
     private Logger logger = LoggerFactory.getLogger(ResponseHandler.class);
 
     private GatewayConfig config = GatewayConfig.getInstance();
-    private HttpRequestContext httpRequestContext = HttpRequestContext.getInstance();
 
     public void send(Channel channel, FullHttpResponse response) {
         response.headers().set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
-        Boolean keepAlive = httpRequestContext.get(channel, RequestConstant.KEEPALIVE);
+        Boolean keepAlive = ContextUtil.getKeepAlive(channel);
         HttpUtil.setKeepAlive(response, keepAlive == null ? false : keepAlive);
         channel.writeAndFlush(response).addListener(new ChannelFutureListener() {
             @Override

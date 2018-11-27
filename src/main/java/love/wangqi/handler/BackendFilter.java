@@ -1,6 +1,6 @@
 package love.wangqi.handler;
 
-import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
@@ -20,12 +20,12 @@ import java.util.concurrent.TimeUnit;
  */
 public class BackendFilter extends ChannelInitializer<SocketChannel> {
     private final SslContext sslCtx;
-    private final ChannelHandlerContext ctx;
+    private final Channel serverChannel;
     private final Integer readTimeout;
 
-    public BackendFilter(SslContext sslCtx, ChannelHandlerContext ctx, Integer readTimeout) {
+    public BackendFilter(SslContext sslCtx, Channel serverChannel, Integer readTimeout) {
         this.sslCtx = sslCtx;
-        this.ctx = ctx;
+        this.serverChannel = serverChannel;
         this.readTimeout = readTimeout;
     }
 
@@ -40,6 +40,6 @@ public class BackendFilter extends ChannelInitializer<SocketChannel> {
         pipeline.addLast(new HttpObjectAggregator(1024 * 1024 * 64));
         pipeline.addLast(new ChunkedWriteHandler());
         pipeline.addLast(new ReadTimeoutHandler(readTimeout, TimeUnit.MILLISECONDS));
-        pipeline.addLast(new BackendHandler(ctx));
+        pipeline.addLast(new BackendHandler(serverChannel));
     }
 }

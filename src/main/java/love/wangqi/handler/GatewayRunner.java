@@ -1,11 +1,11 @@
 package love.wangqi.handler;
 
-import io.netty.handler.codec.http.FullHttpRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import love.wangqi.context.HttpRequestContext;
+import io.netty.channel.Channel;
+import love.wangqi.context.ContextUtil;
 import love.wangqi.exception.GatewayException;
 import love.wangqi.filter.FilterProcessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -18,7 +18,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class GatewayRunner {
     private final static Logger logger = LoggerFactory.getLogger(GatewayRunner.class);
 
-    private HttpRequestContext httpRequestContext = HttpRequestContext.getInstance();
     private final static GatewayRunner INSTANCE = new GatewayRunner();
 
     private GatewayRunner() {}
@@ -107,71 +106,67 @@ public class GatewayRunner {
             30L, TimeUnit.MILLISECONDS,
             new LinkedBlockingQueue<>(), new ErrorRouteThreadFactory());
 
-    public void forwardAction(FullHttpRequest fullHttpRequest) {
-        CompletableFuture.completedFuture(fullHttpRequest)
-                .thenApplyAsync(httpRequest -> {
-                    preRoute(httpRequest);
-                    return httpRequest;
+    private void errorAction(Channel channel, Exception e) {
+        CompletableFuture.completedFuture(e)
+                .thenAcceptAsync(throwable1 -> {
+                    ContextUtil.setException(channel, e);
+                    error(channel);
+                }, errorRoutePool);
+    }
+
+    public void forwardAction(Channel channel) {
+        CompletableFuture.completedFuture(channel)
+                .thenApplyAsync(ch -> {
+                    preRoute(ch);
+                    return ch;
                 }, preRoutePool)
-                .thenApplyAsync(httpRequest -> {
-                    route(httpRequest);
-                    return httpRequest;
+                .thenApplyAsync(ch -> {
+                    route(ch);
+                    return ch;
                 }, routePool)
                 .exceptionally(throwable -> {
-                    CompletableFuture.completedFuture(throwable)
-                            .thenAcceptAsync(throwable1 -> {
-                                httpRequestContext.setException(fullHttpRequest, (Exception) throwable.getCause());
-                                error(fullHttpRequest);
-                            }, errorRoutePool);
+                    errorAction(channel, (Exception) throwable.getCause());
                     return null;
                 });
     }
 
-    public void errorAction(FullHttpRequest fullHttpRequest) {
-        CompletableFuture.completedFuture(fullHttpRequest)
-                .thenApplyAsync(httpRequest -> {
-                    error(httpRequest);
-                    return httpRequest;
+    public void errorAction(Channel channel) {
+        CompletableFuture.completedFuture(channel)
+                .thenApplyAsync(ch -> {
+                    error(ch);
+                    return ch;
                 }, errorRoutePool)
                 .exceptionally(throwable -> {
-                    CompletableFuture.completedFuture(throwable)
-                            .thenAcceptAsync(throwable1 -> {
-                                httpRequestContext.setException(fullHttpRequest, (Exception) throwable.getCause());
-                                error(fullHttpRequest);
-                            }, errorRoutePool);
+                    errorAction(channel, (Exception) throwable.getCause());
                     return null;
                 });
     }
 
-    public void postRoutAction(FullHttpRequest fullHttpRequest) {
-        CompletableFuture.completedFuture(fullHttpRequest)
-                .thenApplyAsync(httpRequest -> {
-                    postRoute(httpRequest);
-                    return httpRequest;
+    public void postRoutAction(Channel channel) {
+        CompletableFuture.completedFuture(channel)
+                .thenApplyAsync(ch -> {
+                    postRoute(ch);
+                    return ch;
                 }, postRoutePool)
                 .exceptionally(throwable -> {
-                    CompletableFuture.completedFuture(throwable)
-                            .thenAcceptAsync(throwable1 -> {
-                                httpRequestContext.setException(fullHttpRequest, (Exception) throwable.getCause());
-                                error(fullHttpRequest);
-                            }, errorRoutePool);
+                    errorAction(channel, (Exception) throwable.getCause());
                     return null;
                 });
     }
 
-    public void preRoute(FullHttpRequest httpRequest) throws GatewayException {
-        FilterProcessor.getInstance().preRoute(httpRequest);
+    public void preRoute(Channel channel) throws GatewayException {
+        FilterProcessor.getInstance().preRoute(channel);
     }
 
-    public void route(FullHttpRequest httpRequest) throws GatewayException {
-        FilterProcessor.getInstance().route(httpRequest);
+    public void route(Channel channel) throws GatewayException {
+        FilterProcessor.getInstance().route(channel);
     }
 
-    public void postRoute(FullHttpRequest httpRequest) throws GatewayException {
-        FilterProcessor.getInstance().postRoute(httpRequest);
+    public void postRoute(Channel channel) throws GatewayException {
+        FilterProcessor.getInstance().postRoute(channel);
     }
 
-    public void error(FullHttpRequest httpRequest) {
-        FilterProcessor.getInstance().error(httpRequest);
+    public void error(Channel channel) {
+        FilterProcessor.getInstance().error(channel);
     }
 }

@@ -4,7 +4,7 @@ package love.wangqi;
 import io.netty.handler.codec.http.HttpMethod;
 import love.wangqi.codec.DefaultHttpRequestBuilder;
 import love.wangqi.config.GatewayConfig;
-import love.wangqi.core.DefaultChannelCloseFutureListener;
+import love.wangqi.core.DefaultChannelWriteFinishListener;
 import love.wangqi.core.ResponseHandler;
 import love.wangqi.exception.handler.DefaultExceptionHandler;
 import love.wangqi.route.AbstractRouteMapper;
@@ -50,7 +50,7 @@ public class GatewayServerDemo {
         config.setPort(8888);
         config.setHttpRequestBuilder(new DefaultHttpRequestBuilder());
         config.setRouteMapper(routeMapper);
-        config.setChannelCloseFutureListener(new DefaultChannelCloseFutureListener());
+        config.setChannelWriteFinishListener(new DefaultChannelWriteFinishListener());
         config.setResponseHandler(new ResponseHandler());
         config.setExceptionHandler(new DefaultExceptionHandler());
 

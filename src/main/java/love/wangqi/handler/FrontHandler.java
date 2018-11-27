@@ -29,6 +29,7 @@ public class FrontHandler extends ChannelInboundHandlerAdapter {
             }
 
             FullHttpRequest httpRequest = (FullHttpRequest) msg;
+            logger.debug("serverChannelId: {}", ctx.channel().id());
             ContextUtil.setRequest(ctx.channel(), httpRequest);
 
             Boolean keepAlive = HttpUtil.isKeepAlive(httpRequest);

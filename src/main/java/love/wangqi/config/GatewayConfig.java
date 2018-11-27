@@ -1,6 +1,7 @@
 package love.wangqi.config;
 
 
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelInboundHandler;
 import io.netty.channel.ChannelOutboundHandler;
 import love.wangqi.codec.HttpRequestBuilder;
@@ -8,7 +9,6 @@ import love.wangqi.core.ResponseHandler;
 import love.wangqi.exception.handler.ExceptionHandler;
 import love.wangqi.filter.FilterRegistry;
 import love.wangqi.filter.GatewayFilter;
-import love.wangqi.listener.ChannelCloseFutureListener;
 import love.wangqi.route.RouteMapper;
 
 import java.util.*;
@@ -21,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class GatewayConfig {
 
-    final static GatewayConfig INSTANCE = new GatewayConfig();
+    public final static GatewayConfig INSTANCE = new GatewayConfig();
 
     private final ConcurrentHashMap<String, List<GatewayFilter>> hashFiltersByType = new ConcurrentHashMap<String, List<GatewayFilter>>();
 
@@ -74,9 +74,9 @@ public class GatewayConfig {
      */
     private int port;
     /**
-     * channel关闭监听器
+     * channel写完成监听器
      */
-    private ChannelCloseFutureListener channelCloseFutureListener;
+    private ChannelFutureListener channelWriteFinishListener;
     /**
      * 异常处理器
      */
@@ -141,12 +141,12 @@ public class GatewayConfig {
         this.port = port;
     }
 
-    public ChannelCloseFutureListener getChannelCloseFutureListener() {
-        return channelCloseFutureListener;
+    public ChannelFutureListener getChannelWriteFinishListener() {
+        return channelWriteFinishListener;
     }
 
-    public void setChannelCloseFutureListener(ChannelCloseFutureListener channelCloseFutureListener) {
-        this.channelCloseFutureListener = channelCloseFutureListener;
+    public void setChannelWriteFinishListener(ChannelFutureListener channelWriteFinishListener) {
+        this.channelWriteFinishListener = channelWriteFinishListener;
     }
 
     public ExceptionHandler getExceptionHandler() {

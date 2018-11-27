@@ -62,6 +62,19 @@ public class Route implements Cloneable {
         return route;
     }
 
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        return this.id.equals(((Route) obj).id);
+    }
+
     public Long getId() {
         return id;
     }

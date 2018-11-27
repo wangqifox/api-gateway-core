@@ -28,6 +28,7 @@ public class ForwardRunner {
     private final static String HTTPS = "https";
     private final static EventLoopGroup eventExecutors = new NioEventLoopGroup(8 * 8);
 
+
     private final static Logger logger = LoggerFactory.getLogger(ForwardRunner.class);
 
     public ForwardRunner(Channel serverChannel, RequestHolder requestHolder) {
@@ -73,7 +74,7 @@ public class ForwardRunner {
         return new UrlMetadata(protocol, host, port);
     }
 
-    private void forward() throws Exception {
+    private void forward2() throws Exception {
         URL url = requestHolder.url;
         HttpRequest request = requestHolder.request;
         HttpPostRequestEncoder bodyRequestEncoder = requestHolder.bodyRequestEncoder;
@@ -106,5 +107,9 @@ public class ForwardRunner {
                 ch.flush();
             }
         });
+    }
+
+    private void forward() throws Exception {
+        HttpClientPool.INSTANCE.request(requestHolder, serverChannel);
     }
 }

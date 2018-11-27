@@ -1,5 +1,6 @@
 package love.wangqi.context;
 
+import io.netty.channel.Channel;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.util.AttributeKey;
@@ -14,4 +15,5 @@ public interface Attributes {
     AttributeKey<Exception> EXCEPTION = AttributeKey.newInstance("exception");
     AttributeKey<FullHttpResponse> RESPONSE = AttributeKey.newInstance("response");
     AttributeKey<Boolean> KEEPALIVE = AttributeKey.newInstance("keepAlive");
+    AttributeKey<Channel> SERVER_CHANNEL = AttributeKey.newInstance("serverChannel");
 }

@@ -46,7 +46,7 @@ public class HttpClientPool {
             @Override
             protected SimpleChannelPool newPool(RequestHolder requestHolder) {
                 logger.debug("address: {}", requestHolder.getSocketAddress());
-                return new FixedChannelPool(bootstrap.remoteAddress(requestHolder.getSocketAddress()), new HttpPoolHandler(requestHolder), 1);
+                return new FixedChannelPool(bootstrap.remoteAddress(requestHolder.getSocketAddress()), new HttpPoolHandler(requestHolder), 50);
             }
         };
     }

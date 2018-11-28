@@ -2,7 +2,6 @@ package love.wangqi.filter.command;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.timeout.ReadTimeoutException;
@@ -16,20 +15,17 @@ import org.slf4j.LoggerFactory;
 /**
  * @author: wangqi
  * @description:
- * @date: Created in 2018-11-26 20:59
+ * @date: Created in 2018-11-28 08:37
  */
-public class HttpHandler extends ChannelInboundHandlerAdapter {
+public class HttpHandler extends SimpleChannelInboundHandler<FullHttpResponse> {
     private Logger logger = LoggerFactory.getLogger(HttpHandler.class);
 
-    @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("channelActive");
-        super.channelActive(ctx);
+    public HttpHandler() {
+        super(false);
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        FullHttpResponse response = (FullHttpResponse) msg;
+    protected void channelRead0(ChannelHandlerContext ctx, FullHttpResponse response) throws Exception {
         logger.debug("handler hashCode: {}", this.hashCode());
         logger.debug("clientChannelId: {}", ctx.channel().id());
         Channel serverChannel = ctx.channel().attr(Attributes.SERVER_CHANNEL).get();
@@ -38,6 +34,12 @@ public class HttpHandler extends ChannelInboundHandlerAdapter {
         ContextUtil.setResponse(serverChannel, response);
 //        ctx.channel().close();
         GatewayRunner.getInstance().postRoutAction(serverChannel);
+    }
+
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        System.out.println("channelActive");
+        super.channelActive(ctx);
     }
 
     @Override

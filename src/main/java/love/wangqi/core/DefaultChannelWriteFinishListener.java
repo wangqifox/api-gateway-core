@@ -23,6 +23,7 @@ public class DefaultChannelWriteFinishListener implements ChannelFutureListener 
         logger.debug("======= serverChannelId: {}", channel.id());
 
         ContextUtil.getRequest(channel).release();
+        ContextUtil.clear(channel);
 
         if (!keepAlive) {
             channel.close();

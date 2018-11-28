@@ -42,4 +42,11 @@ public class ContextUtil {
     public static Exception getException(Channel channel) {
         return channel.attr(Attributes.EXCEPTION).get();
     }
+
+    public static void clear(Channel channel) {
+        channel.attr(Attributes.REQUEST).set(null);
+        channel.attr(Attributes.RESPONSE).set(null);
+        channel.attr(Attributes.KEEPALIVE).set(null);
+        channel.attr(Attributes.EXCEPTION).set(null);
+    }
 }

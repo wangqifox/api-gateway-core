@@ -62,18 +62,14 @@ public class DefaultHttpRequestBuilder implements HttpRequestBuilder {
         // 请求路径
         QueryStringEncoder queryStringEncoder = new QueryStringEncoder(url.getPath());
         // 请求参数
-        buildParams(route).forEach((key, values) -> {
-            values.forEach(value -> {
-                queryStringEncoder.addParam(key, value);
-            });
-        });
+        buildParams(route).forEach((key, values) -> values.forEach(value -> {
+            queryStringEncoder.addParam(key, value);
+        }));
         newRequest = new DefaultFullHttpRequest(originRequest.protocolVersion(), originRequest.method(), new URI(queryStringEncoder.toString()).toASCIIString());
         // 请求头
-        buildHeaders(route).forEach((key, values) -> {
-            values.forEach(value -> {
-                newRequest.headers().set(key, value);
-            });
-        });
+        buildHeaders(route).forEach((key, values) -> values.forEach(value -> {
+            newRequest.headers().set(key, value);
+        }));
         newRequest.headers().remove(HttpHeaderNames.COOKIE);
         newRequest.headers().set(HttpHeaderNames.HOST, url.getHost());
         HttpUtil.setKeepAlive(newRequest, true);
@@ -81,11 +77,11 @@ public class DefaultHttpRequestBuilder implements HttpRequestBuilder {
         // 请求体
         String contentType = httpRequestDecomposer.getContentType();
         if (contentType != null) {
-            if (contentType.startsWith("application/json")) {
+            if (contentType.startsWith(HttpHeaderValues.APPLICATION_JSON.toString())) {
                 ByteBuf bbuf = Unpooled.copiedBuffer(buildContentJson(route), StandardCharsets.UTF_8);
                 newRequest.headers().set(HttpHeaderNames.CONTENT_LENGTH, bbuf.readableBytes());
                 ((FullHttpRequest)newRequest).content().writeBytes(bbuf);
-            } else if (contentType.startsWith("application/x-www-form-urlencoded")) {
+            } else if (contentType.startsWith(HttpHeaderValues.APPLICATION_X_WWW_FORM_URLENCODED.toString())) {
                 HttpPostRequestEncoder requestEncoder = new HttpPostRequestEncoder(newRequest, false);
                 buildContentFormUrlEncoded(route).forEach((key, values) -> {
                     values.forEach(value -> {
@@ -96,23 +92,22 @@ public class DefaultHttpRequestBuilder implements HttpRequestBuilder {
                         }
                     });
                 });
-                newRequest = (FullHttpRequest) requestEncoder.finalizeRequest();
-            } else if (contentType.startsWith("multipart/form-data")) {
+                newRequest = requestEncoder.finalizeRequest();
+            } else if (contentType.startsWith(HttpHeaderValues.MULTIPART_FORM_DATA.toString())) {
                 HttpPostRequestEncoder requestEncoder = new HttpPostRequestEncoder(factory, newRequest, true);
-                for (InterfaceHttpData data : buildContentFormdata(route)) {
+                for (InterfaceHttpData data : buildContentFormData(route)) {
                     if (data.getHttpDataType() == InterfaceHttpData.HttpDataType.Attribute) {
                         requestEncoder.addBodyHttpData(data);
                     } else if (data.getHttpDataType() == InterfaceHttpData.HttpDataType.FileUpload) {
                         requestEncoder.addBodyHttpData(data);
                     }
                 }
-                HttpRequest hr = requestEncoder.finalizeRequest();
-                newRequest = hr;
+                newRequest = requestEncoder.finalizeRequest();
                 newBodyRequestEncoder = requestEncoder;
             } else {
-                ByteBuf bbuf = buildContentOther(route);
-                newRequest.headers().set(HttpHeaderNames.CONTENT_LENGTH, bbuf.readableBytes());
-                ((FullHttpRequest)newRequest).content().writeBytes(bbuf);
+                ByteBuf byteBuf = buildContentOther(route);
+                newRequest.headers().set(HttpHeaderNames.CONTENT_LENGTH, byteBuf.readableBytes());
+                ((FullHttpRequest)newRequest).content().writeBytes(byteBuf);
             }
         }
         return new RequestHolder(route, url, newRequest, newBodyRequestEncoder);
@@ -162,7 +157,7 @@ public class DefaultHttpRequestBuilder implements HttpRequestBuilder {
      * 如果content-type为multipart/form-data，获取请求体
      * @return
      */
-    protected List<InterfaceHttpData> buildContentFormdata(Route route) {
+    protected List<InterfaceHttpData> buildContentFormData(Route route) {
         return httpRequestDecomposer.getContentFormdata();
     }
 

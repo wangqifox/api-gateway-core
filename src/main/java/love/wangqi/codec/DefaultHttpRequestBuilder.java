@@ -57,7 +57,7 @@ public class DefaultHttpRequestBuilder implements HttpRequestBuilder {
             throw new GatewayNoRouteException();
         }
         URL url  = route.getMapUrl();
-//        logger.info(url.toString());
+        logger.info(url.toString());
 
         // 请求路径
         QueryStringEncoder queryStringEncoder = new QueryStringEncoder(url.getPath());
@@ -76,6 +76,7 @@ public class DefaultHttpRequestBuilder implements HttpRequestBuilder {
         });
         newRequest.headers().remove(HttpHeaderNames.COOKIE);
         newRequest.headers().set(HttpHeaderNames.HOST, url.getHost());
+        HttpUtil.setKeepAlive(newRequest, true);
 
         // 请求体
         String contentType = httpRequestDecomposer.getContentType();

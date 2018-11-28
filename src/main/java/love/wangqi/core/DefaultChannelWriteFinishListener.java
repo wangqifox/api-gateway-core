@@ -19,6 +19,7 @@ public class DefaultChannelWriteFinishListener implements ChannelFutureListener 
     public void operationComplete(ChannelFuture future) throws Exception {
         Channel channel = future.channel();
         Boolean keepAlive = ContextUtil.getKeepAlive(channel);
+        logger.debug("keepAlive {}", keepAlive);
         logger.debug("======= serverChannelId: {}", channel.id());
 
         ContextUtil.getRequest(channel).release();

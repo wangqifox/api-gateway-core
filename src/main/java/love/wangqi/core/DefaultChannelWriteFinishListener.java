@@ -17,16 +17,17 @@ public class DefaultChannelWriteFinishListener implements ChannelFutureListener 
 
     @Override
     public void operationComplete(ChannelFuture future) throws Exception {
-        Channel channel = future.channel();
-        Boolean keepAlive = ContextUtil.getKeepAlive(channel);
-        logger.debug("keepAlive {}", keepAlive);
-        logger.debug("======= serverChannelId: {}", channel.id());
+        if (future.isSuccess()) {
+            Channel channel = future.channel();
+            Boolean keepAlive = ContextUtil.getKeepAlive(channel);
 
-        ContextUtil.getRequest(channel).release();
-        ContextUtil.clear(channel);
+//        if (ContextUtil.getRequest(channel) != null) {
+//            ContextUtil.getRequest(channel).release();
+//        }
 
-        if (!keepAlive) {
-            channel.close();
+            if (keepAlive == null || !keepAlive) {
+                channel.close();
+            }
         }
     }
 }

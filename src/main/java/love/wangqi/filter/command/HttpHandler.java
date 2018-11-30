@@ -25,15 +25,19 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpResponse> {
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, FullHttpResponse response) throws Exception {
-        logger.debug("handler hashCode: {}", this.hashCode());
-        logger.debug("clientChannelId: {}", ctx.channel().id());
-        Channel serverChannel = ctx.channel().attr(Attributes.SERVER_CHANNEL).get();
-        logger.debug("serverChannelId: {}", serverChannel.id());
+    public void channelReadComplete(ChannelHandlerContext ctx) {
+        ctx.flush();
+    }
+
+    @Override
+    public void channelRead0(ChannelHandlerContext ctx, FullHttpResponse response) throws Exception {
+        Channel clientChannel = ctx.channel();
+        Channel serverChannel = clientChannel.attr(Attributes.SERVER_CHANNEL).get();
 
         ContextUtil.setResponse(serverChannel, response);
-//        ctx.channel().close();
         GatewayRunner.getInstance().postRoutAction(serverChannel);
+
+        clientChannel.attr(Attributes.CLIENT_POOL).get().release(clientChannel);
     }
 
     @Override
@@ -45,7 +49,6 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpResponse> {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         Channel serverChannel = ctx.channel().attr(Attributes.SERVER_CHANNEL).get();
-        logger.debug("serverChannelId: {}", serverChannel.id());
         if (cause instanceof ReadTimeoutException) {
             logger.error("read time out");
             Exception exception = new GatewayTimeoutException();

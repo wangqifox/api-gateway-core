@@ -40,6 +40,7 @@ public class GatewayServerDemo {
                     routeList.add(new Route(7L, HttpMethod.GET, "/css/main.css", new URL("https://blog.wangqi.love/css/main.css")));
                     routeList.add(new Route(8L, HttpMethod.GET, "/path", new URL("http://127.0.0.1:9990/path")));
                     routeList.add(new Route(9L, HttpMethod.GET, "/html", new URL("http://10.100.64.71/html/user.json")));
+                    routeList.add(new Route(10L, HttpMethod.GET, "/css", new URL("https://ss0.bdstatic.com/5aV1bjqh_Q23odCf/static/mantpl/css/news/init_7637f86c.css")));
                 } catch (MalformedURLException e) {
                 }
                 return routeList;

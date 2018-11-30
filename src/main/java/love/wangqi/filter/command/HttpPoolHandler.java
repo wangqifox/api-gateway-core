@@ -27,11 +27,9 @@ import static love.wangqi.context.Constants.HTTPS;
 public class HttpPoolHandler implements ChannelPoolHandler {
     private static final Logger logger = LoggerFactory.getLogger(HttpPoolHandler.class);
 
-    private RequestHolder requestHolder;
     private SslContext sslCtx = null;
 
     public HttpPoolHandler(RequestHolder requestHolder) {
-        this.requestHolder = requestHolder;
         if (requestHolder.getProtocol().equalsIgnoreCase(HTTPS)) {
             try {
                 sslCtx = SslContextBuilder.forClient()

@@ -30,7 +30,7 @@ public class SendErrorFilter extends GatewayFilter {
     public void filter(Channel channel) throws Exception {
         Exception e = ContextUtil.getException(channel);
         if (e != null) {
-            logger.error(e.toString());
+            logger.error(e.getMessage(), e);
             config.getExceptionHandler().handle(channel, e);
         }
     }

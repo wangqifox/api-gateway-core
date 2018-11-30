@@ -8,8 +8,6 @@ import love.wangqi.handler.GatewayRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.charset.Charset;
-
 /**
  * @author: wangqi
  * @description:
@@ -35,9 +33,14 @@ public class SendResponseFilter extends GatewayFilter {
     public void filter(Channel channel) throws Exception {
         Exception e = ContextUtil.getException(channel);
         if (e == null) {
-            FullHttpResponse response = ContextUtil.getResponse(channel);
-//            logger.info("*** content {}", response.content().toString(Charset.defaultCharset()));
-            config.getResponseHandler().send(channel, response);
+            try {
+                FullHttpResponse response = ContextUtil.getResponse(channel);
+                config.getResponseHandler().send(channel, response);
+            } catch (Exception sendException) {
+                logger.error(sendException.getMessage(), sendException);
+                throw sendException;
+            }
+
         } else {
             GatewayRunner.getInstance().errorAction(channel);
         }

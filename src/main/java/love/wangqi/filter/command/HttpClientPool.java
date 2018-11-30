@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 public class HttpClientPool {
     private final static Logger logger = LoggerFactory.getLogger(HttpClientPool.class);
 
-    private final EventLoopGroup group = new NioEventLoopGroup();
+    private final EventLoopGroup group = new NioEventLoopGroup(8 * 4);
     private final Bootstrap bootstrap = new Bootstrap();
     private ChannelPoolMap<RequestHolder, SimpleChannelPool> poolMap;
 
@@ -51,10 +51,9 @@ public class HttpClientPool {
         };
     }
 
-    public void request(RequestHolder requestHolder, Channel serverChannel) {
-        logger.debug("requestHolder.hashCode: {}", requestHolder.hashCode());
+    public synchronized void request(RequestHolder requestHolder, Channel serverChannel) throws InterruptedException {
         final SimpleChannelPool pool = poolMap.get(requestHolder);
-        Future<Channel> f = pool.acquire();
+        Future<Channel> f = pool.acquire().sync();
         f.addListener((FutureListener<Channel>) future -> {
             if (future.isSuccess()) {
                 HttpRequest request = requestHolder.request;
@@ -62,13 +61,15 @@ public class HttpClientPool {
 
                 Channel clientChannel = future.getNow();
                 clientChannel.attr(Attributes.SERVER_CHANNEL).set(serverChannel);
+                clientChannel.attr(Attributes.CLIENT_POOL).set(pool);
+
                 clientChannel.write(request);
                 if (bodyRequestEncoder != null && bodyRequestEncoder.isChunked()) {
                     clientChannel.write(bodyRequestEncoder);
                 }
                 clientChannel.flush();
 
-                pool.release(clientChannel);
+//                pool.release(clientChannel);
             }
         });
     }

@@ -18,5 +18,9 @@
 
     </logger>
 
+    <logger name="love.wangqi.handler.FrontFilter" level="info">
+
+    </logger>
+
 
 </configuration>

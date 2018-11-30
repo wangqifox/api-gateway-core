@@ -41,12 +41,6 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpResponse> {
     }
 
     @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("channelActive");
-        super.channelActive(ctx);
-    }
-
-    @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         Channel serverChannel = ctx.channel().attr(Attributes.SERVER_CHANNEL).get();
         if (cause instanceof ReadTimeoutException) {
@@ -58,11 +52,5 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpResponse> {
             ContextUtil.setException(serverChannel, new RuntimeException(cause));
         }
         GatewayRunner.getInstance().errorAction(serverChannel);
-    }
-
-    @Override
-    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("channelInactive");
-        super.channelInactive(ctx);
     }
 }

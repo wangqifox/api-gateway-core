@@ -1,7 +1,10 @@
 package love.wangqi.exception.handler;
 
 import io.netty.channel.Channel;
-import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.http.DefaultFullHttpResponse;
+import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpVersion;
 import love.wangqi.config.GatewayConfig;
 import love.wangqi.exception.GatewayException;
 

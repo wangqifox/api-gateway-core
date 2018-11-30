@@ -57,7 +57,7 @@ public class DefaultHttpRequestBuilder implements HttpRequestBuilder {
             throw new GatewayNoRouteException();
         }
         URL url  = route.getMapUrl();
-        logger.info(url.toString());
+        logger.debug("proxy_pass {}", url.toString());
 
         // 请求路径
         QueryStringEncoder queryStringEncoder = new QueryStringEncoder(url.getPath());

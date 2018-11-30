@@ -1,4 +1,4 @@
-package love.wangqi.filter.command;
+package love.wangqi.handler.back;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
@@ -24,12 +24,12 @@ import static love.wangqi.context.Constants.HTTPS;
  * @description:
  * @date: Created in 2018-11-27 16:24
  */
-public class HttpPoolHandler implements ChannelPoolHandler {
-    private static final Logger logger = LoggerFactory.getLogger(HttpPoolHandler.class);
+public class BackPoolHandler implements ChannelPoolHandler {
+    private static final Logger logger = LoggerFactory.getLogger(BackPoolHandler.class);
 
     private SslContext sslCtx = null;
 
-    public HttpPoolHandler(RequestHolder requestHolder) {
+    public BackPoolHandler(RequestHolder requestHolder) {
         if (requestHolder.getProtocol().equalsIgnoreCase(HTTPS)) {
             try {
                 sslCtx = SslContextBuilder.forClient()
@@ -65,6 +65,6 @@ public class HttpPoolHandler implements ChannelPoolHandler {
         pipeline.addLast(new HttpObjectAggregator(1024 * 1024 * 64));
         pipeline.addLast(new ChunkedWriteHandler());
 //        pipeline.addLast(new ReadTimeoutHandler(requestHolder.route.getTimeoutInMilliseconds(), TimeUnit.MILLISECONDS));
-        pipeline.addLast(new HttpHandler());
+        pipeline.addLast(new BackHandler());
     }
 }

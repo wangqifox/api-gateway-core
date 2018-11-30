@@ -44,7 +44,6 @@ public class DefaultExceptionHandler extends AbstractExceptionHandler {
     public void send(Channel channel, ExceptionResponse exceptionResponse) {
         String content = exceptionResponse.getContent();
         FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, exceptionResponse.getStatus());
-        response.headers().set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
         if (content != null) {
             response.headers().set("X-Ca-Error-Message", content);
         }

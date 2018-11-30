@@ -13,4 +13,8 @@ public class GatewayNoRouteException extends GatewayException {
         super(HttpResponseStatus.NOT_FOUND, "no route found");
     }
 
+    @Override
+    public synchronized Throwable fillInStackTrace() {
+        return this;
+    }
 }

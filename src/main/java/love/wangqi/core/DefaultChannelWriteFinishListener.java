@@ -21,10 +21,6 @@ public class DefaultChannelWriteFinishListener implements ChannelFutureListener 
             Channel channel = future.channel();
             Boolean keepAlive = ContextUtil.getKeepAlive(channel);
 
-//        if (ContextUtil.getRequest(channel) != null) {
-//            ContextUtil.getRequest(channel).release();
-//        }
-
             if (keepAlive == null || !keepAlive) {
                 channel.close();
             }

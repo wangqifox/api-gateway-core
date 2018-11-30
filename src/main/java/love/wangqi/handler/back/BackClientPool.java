@@ -1,4 +1,4 @@
-package love.wangqi.filter.command;
+package love.wangqi.handler.back;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -25,16 +25,16 @@ import org.slf4j.LoggerFactory;
  * @description:
  * @date: Created in 2018-11-27 16:14
  */
-public class HttpClientPool {
-    private final static Logger logger = LoggerFactory.getLogger(HttpClientPool.class);
+public class BackClientPool {
+    private final static Logger logger = LoggerFactory.getLogger(BackClientPool.class);
 
     private final EventLoopGroup group = new NioEventLoopGroup(8 * 4);
     private final Bootstrap bootstrap = new Bootstrap();
     private ChannelPoolMap<RequestHolder, SimpleChannelPool> poolMap;
 
-    public static final HttpClientPool INSTANCE = new HttpClientPool();
+    public static final BackClientPool INSTANCE = new BackClientPool();
 
-    private HttpClientPool() {
+    private BackClientPool() {
         bootstrap
                 .group(group)
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 500)
@@ -45,7 +45,7 @@ public class HttpClientPool {
         poolMap = new AbstractChannelPoolMap<RequestHolder, SimpleChannelPool>() {
             @Override
             protected SimpleChannelPool newPool(RequestHolder requestHolder) {
-                return new FixedChannelPool(bootstrap.remoteAddress(requestHolder.getSocketAddress()), new HttpPoolHandler(requestHolder), 50);
+                return new FixedChannelPool(bootstrap.remoteAddress(requestHolder.getSocketAddress()), new BackPoolHandler(requestHolder), 50);
             }
         };
     }
@@ -67,8 +67,6 @@ public class HttpClientPool {
                     clientChannel.write(bodyRequestEncoder);
                 }
                 clientChannel.flush();
-
-//                pool.release(clientChannel);
             }
         });
     }

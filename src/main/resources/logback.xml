@@ -14,11 +14,7 @@
 
     </logger>
 
-    <logger name="love.wangqi.filter.command.HttpPoolHandler" level="info">
-
-    </logger>
-
-    <logger name="love.wangqi.handler.FrontFilter" level="info">
+    <logger name="love.wangqi" level="info">
 
     </logger>
 

@@ -12,12 +12,16 @@ import io.netty.channel.pool.SimpleChannelPool;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.multipart.HttpPostRequestEncoder;
+import io.netty.handler.timeout.ReadTimeoutHandler;
+import io.netty.handler.timeout.WriteTimeoutHandler;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.FutureListener;
 import love.wangqi.codec.RequestHolder;
 import love.wangqi.context.Attributes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -59,6 +63,13 @@ public class BackClientPool {
                 HttpPostRequestEncoder bodyRequestEncoder = requestHolder.bodyRequestEncoder;
 
                 Channel clientChannel = future.getNow();
+
+                // 添加读写超时控制器
+                clientChannel.pipeline().addFirst("ReadTimeoutHandler",
+                        new ReadTimeoutHandler(requestHolder.route.getTimeoutInMilliseconds(), TimeUnit.MILLISECONDS));
+                clientChannel.pipeline().addFirst("WriteTimeoutHandler",
+                        new WriteTimeoutHandler(500, TimeUnit.MILLISECONDS));
+
                 clientChannel.attr(Attributes.SERVER_CHANNEL).set(serverChannel);
                 clientChannel.attr(Attributes.CLIENT_POOL).set(pool);
 

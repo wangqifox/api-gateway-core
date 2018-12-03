@@ -5,6 +5,7 @@ import io.netty.channel.pool.SimpleChannelPool;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.util.AttributeKey;
+import love.wangqi.codec.RequestHolder;
 
 /**
  * @author: wangqi
@@ -18,4 +19,5 @@ public interface Attributes {
     AttributeKey<Boolean> KEEPALIVE = AttributeKey.newInstance("keepAlive");
     AttributeKey<Channel> SERVER_CHANNEL = AttributeKey.newInstance("serverChannel");
     AttributeKey<SimpleChannelPool> CLIENT_POOL = AttributeKey.newInstance("clientPool");
+    AttributeKey<RequestHolder> REQUEST_HOLDER = AttributeKey.newInstance("requestHolder");
 }

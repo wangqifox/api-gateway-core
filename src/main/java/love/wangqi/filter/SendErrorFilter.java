@@ -1,6 +1,7 @@
 package love.wangqi.filter;
 
 import io.netty.channel.Channel;
+import love.wangqi.codec.RequestHolder;
 import love.wangqi.config.GatewayConfig;
 import love.wangqi.context.ContextUtil;
 import org.slf4j.Logger;
@@ -30,7 +31,8 @@ public class SendErrorFilter extends GatewayFilter {
     public void filter(Channel channel) throws Exception {
         Exception e = ContextUtil.getException(channel);
         if (e != null) {
-            logger.error(e.getMessage(), e);
+            RequestHolder requestHolder = ContextUtil.getRequestHolder(channel);
+            logger.error("Route Id: " + requestHolder.route.getId() + " Route Url: " + requestHolder.route.getMapUrl() + " " + e.getMessage(), e);
             config.getExceptionHandler().handle(channel, e);
         }
     }

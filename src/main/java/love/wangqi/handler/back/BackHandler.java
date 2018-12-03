@@ -38,6 +38,10 @@ public class BackHandler extends SimpleChannelInboundHandler<FullHttpResponse> {
         GatewayRunner.getInstance().postRoutAction(serverChannel);
 
         clientChannel.attr(Attributes.CLIENT_POOL).get().release(clientChannel);
+
+        // 移除读写超时控制器
+        ctx.channel().pipeline().remove("ReadTimeoutHandler");
+        ctx.channel().pipeline().remove("WriteTimeoutHandler");
     }
 
     @Override

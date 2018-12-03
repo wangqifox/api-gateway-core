@@ -3,6 +3,7 @@ package love.wangqi.context;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
+import love.wangqi.codec.RequestHolder;
 
 
 /**
@@ -33,6 +34,14 @@ public class ContextUtil {
 
     public static Boolean getKeepAlive(Channel channel) {
         return channel.attr(Attributes.KEEPALIVE).get();
+    }
+
+    public static void setRequestHolder(Channel channel, RequestHolder requestHolder) {
+        channel.attr(Attributes.REQUEST_HOLDER).set(requestHolder);
+    }
+
+    public static RequestHolder getRequestHolder(Channel channel) {
+        return channel.attr(Attributes.REQUEST_HOLDER).get();
     }
 
     public static void setException(Channel channel, Exception exception) {

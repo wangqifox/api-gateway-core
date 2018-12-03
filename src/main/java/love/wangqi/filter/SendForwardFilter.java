@@ -34,6 +34,7 @@ public class SendForwardFilter extends GatewayFilter {
         FullHttpRequest httpRequest = ContextUtil.getRequest(channel);
         RequestHolder requestHolder = httpRequestBuilder.build(httpRequest);
         httpRequest.release();
+        ContextUtil.setRequestHolder(channel, requestHolder);
 
         BackClientPool.INSTANCE.request(requestHolder, channel);
     }

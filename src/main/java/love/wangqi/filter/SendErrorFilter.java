@@ -32,7 +32,9 @@ public class SendErrorFilter extends GatewayFilter {
         Exception e = ContextUtil.getException(channel);
         if (e != null) {
             RequestHolder requestHolder = ContextUtil.getRequestHolder(channel);
-            logger.error("Route Id: " + requestHolder.route.getId() + " Route Url: " + requestHolder.route.getMapUrl() + " " + e.getMessage(), e);
+            if (requestHolder != null) {
+                logger.error("Route Id: " + requestHolder.route.getId() + " Route Url: " + requestHolder.route.getMapUrl() + " " + e.getMessage(), e);
+            }
             config.getExceptionHandler().handle(channel, e);
         }
     }

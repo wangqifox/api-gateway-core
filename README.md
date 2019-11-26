@@ -1,2 +1,3 @@
 # api-gateway-core
-a lightweight api gateway
+
+`api-gateway-core`是一个轻量级的api网关

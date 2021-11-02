@@ -32,8 +32,10 @@ public class GatewayServerDemo {
                 List<Route> routeList = new ArrayList<>();
                 try {
                     routeList.add(new Route(1L, HttpMethod.GET, "/", new URL("https://blog.wangqi.love/")));
+                    routeList.add(new Route(1L, HttpMethod.GET, "/wangqi", new URL("http://wangqi.love/")));
+                    routeList.add(new Route(1L, HttpMethod.GET, "/117", new URL("http://10.0.111.117/#/login")));
                     routeList.add(new Route(2L, HttpMethod.GET, "/baidu", new URL("https://www.baidu.com/")));
-                    routeList.add(new Route(3L, HttpMethod.GET, "/taobao", new URL("https://www.taobao.com/")));
+                    routeList.add(new Route(3L, HttpMethod.GET, "/taobao", new URL("http://www.taobao.com/")));
                     routeList.add(new Route(4L, HttpMethod.GET, "/github", new URL("https://github.com/")));
                     routeList.add(new Route(5L, HttpMethod.GET, "/oschina", new URL("https://www.oschina.net/")));
                     routeList.add(new Route(6L, HttpMethod.POST, "/users/{id}", new URL("http://127.0.0.1/pre/users/{id}")));

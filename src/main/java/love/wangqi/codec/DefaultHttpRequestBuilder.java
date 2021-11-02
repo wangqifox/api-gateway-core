@@ -56,7 +56,7 @@ public class DefaultHttpRequestBuilder implements HttpRequestBuilder {
         if (route == null) {
             throw new GatewayNoRouteException();
         }
-        URL url  = route.getMapUrl();
+        URL url = route.getMapUrl();
         logger.info("proxy_pass {}", url.toString());
 
         // 请求路径
@@ -80,7 +80,7 @@ public class DefaultHttpRequestBuilder implements HttpRequestBuilder {
             if (contentType.startsWith(HttpHeaderValues.APPLICATION_JSON.toString())) {
                 ByteBuf bbuf = Unpooled.copiedBuffer(buildContentJson(route), StandardCharsets.UTF_8);
                 newRequest.headers().set(HttpHeaderNames.CONTENT_LENGTH, bbuf.readableBytes());
-                ((FullHttpRequest)newRequest).content().writeBytes(bbuf);
+                ((FullHttpRequest) newRequest).content().writeBytes(bbuf);
             } else if (contentType.startsWith(HttpHeaderValues.APPLICATION_X_WWW_FORM_URLENCODED.toString())) {
                 HttpPostRequestEncoder requestEncoder = new HttpPostRequestEncoder(newRequest, false);
                 buildContentFormUrlEncoded(route).forEach((key, values) -> {
@@ -107,7 +107,7 @@ public class DefaultHttpRequestBuilder implements HttpRequestBuilder {
             } else {
                 ByteBuf byteBuf = buildContentOther(route);
                 newRequest.headers().set(HttpHeaderNames.CONTENT_LENGTH, byteBuf.readableBytes());
-                ((FullHttpRequest)newRequest).content().writeBytes(byteBuf);
+                ((FullHttpRequest) newRequest).content().writeBytes(byteBuf);
             }
         }
         return new RequestHolder(route, url, newRequest, newBodyRequestEncoder);
@@ -115,6 +115,7 @@ public class DefaultHttpRequestBuilder implements HttpRequestBuilder {
 
     /**
      * 返回path（不包含?后面的参数部分）
+     *
      * @return
      */
     protected String buildPath(Route route) {
@@ -123,6 +124,7 @@ public class DefaultHttpRequestBuilder implements HttpRequestBuilder {
 
     /**
      * 返回请求的请求参数
+     *
      * @return
      */
     protected Map<String, List<String>> buildParams(Route route) {
@@ -131,6 +133,7 @@ public class DefaultHttpRequestBuilder implements HttpRequestBuilder {
 
     /**
      * 返回请求的请求头
+     *
      * @return
      */
     protected Map<String, List<String>> buildHeaders(Route route) {
@@ -139,6 +142,7 @@ public class DefaultHttpRequestBuilder implements HttpRequestBuilder {
 
     /**
      * 如果content-type为application/json，获取请求体
+     *
      * @return
      */
     protected String buildContentJson(Route route) {
@@ -147,6 +151,7 @@ public class DefaultHttpRequestBuilder implements HttpRequestBuilder {
 
     /**
      * 如果content-type为application/x-www-form-urlencoded，获取请求体
+     *
      * @return
      */
     protected Map<String, List<String>> buildContentFormUrlEncoded(Route route) {
@@ -155,6 +160,7 @@ public class DefaultHttpRequestBuilder implements HttpRequestBuilder {
 
     /**
      * 如果content-type为multipart/form-data，获取请求体
+     *
      * @return
      */
     protected List<InterfaceHttpData> buildContentFormData(Route route) {
@@ -163,6 +169,7 @@ public class DefaultHttpRequestBuilder implements HttpRequestBuilder {
 
     /**
      * 其他类型的content-type则直接返回相应的ByteBuf
+     *
      * @return
      */
     private ByteBuf buildContentOther(Route route) {

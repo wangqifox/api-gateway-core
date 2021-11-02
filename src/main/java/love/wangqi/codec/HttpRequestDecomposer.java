@@ -32,6 +32,7 @@ public class HttpRequestDecomposer {
 
     /**
      * 获取请求的uri（包含?后面的参数部分）
+     *
      * @return
      */
     public String getUri() {
@@ -40,6 +41,7 @@ public class HttpRequestDecomposer {
 
     /**
      * 获取请求路径（不包含?后面的参数部分）
+     *
      * @return
      */
     public String getPath() {
@@ -49,6 +51,7 @@ public class HttpRequestDecomposer {
 
     /**
      * 获取请求参数
+     *
      * @return
      */
     public Map<String, List<String>> getParams() {
@@ -58,6 +61,7 @@ public class HttpRequestDecomposer {
 
     /**
      * 获取content-type
+     *
      * @return
      */
     public String getContentType() {
@@ -66,6 +70,7 @@ public class HttpRequestDecomposer {
 
     /**
      * 获取请求头
+     *
      * @return
      */
     public Map<String, List<String>> getHeaders() {
@@ -87,6 +92,7 @@ public class HttpRequestDecomposer {
 
     /**
      * 如果content-type为application/json，将内容转换成JsonNode
+     *
      * @return
      */
     public JsonNode getContentJson() {
@@ -95,6 +101,7 @@ public class HttpRequestDecomposer {
 
     /**
      * 如果content-type为application/json，以字符串形式返回请求体
+     *
      * @return
      */
     public String getContentJsonAsString() {
@@ -103,6 +110,7 @@ public class HttpRequestDecomposer {
 
     /**
      * 如果content-type为application/json，将内容转换成相应的类型
+     *
      * @return
      */
     public <T> T getContentJson(Class<T> valueType) {
@@ -117,6 +125,7 @@ public class HttpRequestDecomposer {
 
     /**
      * 如果content-type为application/x-www-form-urlencoded，将内容转换成map
+     *
      * @return
      */
     public Map<String, List<String>> getContentFormUrlEncoded() {
@@ -127,6 +136,7 @@ public class HttpRequestDecomposer {
 
     /**
      * 如果content-type为multipart/form-data，获取内容列表
+     *
      * @return
      */
     public List<InterfaceHttpData> getContentFormdata() {
@@ -136,6 +146,7 @@ public class HttpRequestDecomposer {
 
     /**
      * 其他类型的content-type则直接返回相应的ByteBuf
+     *
      * @return
      */
     public ByteBuf getContentOther() {
@@ -144,6 +155,7 @@ public class HttpRequestDecomposer {
 
     /**
      * 以字符串形式返回请求体
+     *
      * @return
      */
     public String getContentAsString() {

@@ -14,6 +14,7 @@ import java.util.Set;
 public interface RouteMapper {
     /**
      * 根据路径获取Route
+     *
      * @param path
      * @param method
      * @return
@@ -22,6 +23,7 @@ public interface RouteMapper {
 
     /**
      * 根据请求获取Route
+     *
      * @param request
      * @return
      */
@@ -29,12 +31,14 @@ public interface RouteMapper {
 
     /**
      * 刷新路由
+     *
      * @param ids 路由id的列表
      */
     void refresh(Set<Long> ids);
 
     /**
      * 获取路由列表
+     *
      * @return
      */
     List<Route> getRouteList();

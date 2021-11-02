@@ -10,6 +10,7 @@ import io.netty.channel.Channel;
 public interface IGatewayFilter {
     /**
      * 过滤Http请求
+     *
      * @param channel
      * @throws Exception
      */

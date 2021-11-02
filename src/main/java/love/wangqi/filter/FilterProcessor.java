@@ -22,7 +22,8 @@ public class FilterProcessor {
         return INSTANCE;
     }
 
-    private FilterProcessor() {}
+    private FilterProcessor() {
+    }
 
     public void preRoute(Channel channel) throws GatewayException {
         try {

@@ -27,6 +27,7 @@ public abstract class AbstractRouteMapper implements RouteMapper {
 
     /**
      * 遍历所有的路由，返回符合请求的路由
+     *
      * @param path
      * @param method
      * @return
@@ -74,6 +75,7 @@ public abstract class AbstractRouteMapper implements RouteMapper {
 
     /**
      * 获取路由列表
+     *
      * @param ids 路由id的列表
      * @return
      */

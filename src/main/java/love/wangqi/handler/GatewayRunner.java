@@ -20,7 +20,8 @@ public class GatewayRunner {
 
     private final static GatewayRunner INSTANCE = new GatewayRunner();
 
-    private GatewayRunner() {}
+    private GatewayRunner() {
+    }
 
     public static GatewayRunner getInstance() {
         return INSTANCE;
@@ -53,6 +54,7 @@ public class GatewayRunner {
 
         /**
          * 线程名称前缀
+         *
          * @return
          */
         abstract String getNamePrefix();

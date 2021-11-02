@@ -13,6 +13,7 @@ import love.wangqi.route.RouteMapper;
 public interface HttpRequestBuilder {
     /**
      * 设置路由映射器
+     *
      * @param routeMapper
      * @return
      */
@@ -20,6 +21,7 @@ public interface HttpRequestBuilder {
 
     /**
      * 生成新的请求
+     *
      * @param originRequest
      * @return
      * @throws Exception
@@ -28,6 +30,7 @@ public interface HttpRequestBuilder {
 
     /**
      * 获取路由
+     *
      * @param originRequest
      * @return
      */

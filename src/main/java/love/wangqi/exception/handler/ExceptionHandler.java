@@ -10,6 +10,7 @@ import io.netty.channel.Channel;
 public interface ExceptionHandler {
     /**
      * 获取异常返回
+     *
      * @param exception
      * @return
      */
@@ -17,6 +18,7 @@ public interface ExceptionHandler {
 
     /**
      * 发送异常
+     *
      * @param channel
      * @param exceptionResponse
      */
@@ -24,6 +26,7 @@ public interface ExceptionHandler {
 
     /**
      * 处理异常
+     *
      * @param channel
      * @param exception
      */

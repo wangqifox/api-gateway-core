@@ -15,14 +15,16 @@ import java.util.regex.Pattern;
  */
 public class AntPathMatcher implements PathMatcher {
 
-    /** Default path separator: "/" */
+    /**
+     * Default path separator: "/"
+     */
     public static final String DEFAULT_PATH_SEPARATOR = "/";
 
     private static final int CACHE_TURNOFF_THRESHOLD = 65536;
 
     private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\{[^/]+?\\}");
 
-    private static final char[] WILDCARD_CHARS = { '*', '?', '{' };
+    private static final char[] WILDCARD_CHARS = {'*', '?', '{'};
 
 
     private String pathSeparator;
@@ -50,6 +52,7 @@ public class AntPathMatcher implements PathMatcher {
 
     /**
      * A convenient, alternative constructor to use with a custom path separator.
+     *
      * @param pathSeparator the path separator to use, must not be {@code null}.
      * @since 4.1
      */
@@ -71,6 +74,7 @@ public class AntPathMatcher implements PathMatcher {
     /**
      * Specify whether to perform pattern matching in a case-sensitive fashion.
      * <p>Default is {@code true}. Switch this to {@code false} for case-insensitive matching.
+     *
      * @since 4.2
      */
     public void setCaseSensitive(boolean caseSensitive) {
@@ -149,12 +153,10 @@ public class AntPathMatcher implements PathMatcher {
                 }
             }
             return true;
-        }
-        else if (pattIdxStart > pattIdxEnd) {
+        } else if (pattIdxStart > pattIdxEnd) {
             // String not exhausted, but pattern is. Failure.
             return false;
-        }
-        else if (!fullMatch && "**".equals(pattDirs[pattIdxStart])) {
+        } else if (!fullMatch && "**".equals(pattDirs[pattIdxStart])) {
             // Path start definitely matches due to "**" part in pattern.
             return true;
         }
@@ -368,17 +370,14 @@ public class AntPathMatcher implements PathMatcher {
                 String match = matcher.group();
                 if ("?".equals(match)) {
                     patternBuilder.append('.');
-                }
-                else if ("*".equals(match)) {
+                } else if ("*".equals(match)) {
                     patternBuilder.append(".*");
-                }
-                else if (match.startsWith("{") && match.endsWith("}")) {
+                } else if (match.startsWith("{") && match.endsWith("}")) {
                     int colonIdx = match.indexOf(':');
                     if (colonIdx == -1) {
                         patternBuilder.append(DEFAULT_VARIABLE_PATTERN);
                         this.variableNames.add(matcher.group(1));
-                    }
-                    else {
+                    } else {
                         String variablePattern = match.substring(colonIdx + 1, match.length() - 1);
                         patternBuilder.append('(');
                         patternBuilder.append(variablePattern);
@@ -403,6 +402,7 @@ public class AntPathMatcher implements PathMatcher {
 
         /**
          * Main entry point.
+         *
          * @return {@code true} if the string matches against the pattern, or {@code false} otherwise.
          */
         public boolean matchStrings(String str, Map<String, String> uriTemplateVariables) {
@@ -423,8 +423,7 @@ public class AntPathMatcher implements PathMatcher {
                     }
                 }
                 return true;
-            }
-            else {
+            } else {
                 return false;
             }
         }
